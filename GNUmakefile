@@ -6,7 +6,7 @@ PROG = mg
 
 PREFIX ?= /usr/local
 MANDIR ?= ${PREFIX}/man
-DOCDIR ?= ${PREFIX}/share/doc
+DOCDIR ?= ${PREFIX}/share/doc/mg
 INSTALL = /usr/bin/install
 
 CFLAGS ?= -O2 -pipe

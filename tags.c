@@ -8,8 +8,8 @@
 
 #include <sys/queue.h>
 #include <sys/stat.h>
-#ifdef __linux__
-#include "portable/linux/tree.h"
+#if defined(__linux__) || defined(__DragonFly__)
+#include "portable/common/tree.h"
 #else
 #include <sys/tree.h>
 #endif
