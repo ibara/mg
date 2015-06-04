@@ -10,7 +10,7 @@ DPADD+=	${LIBCURSES} ${LIBUTIL}
 #	REGEX		-- create regular expression functions.
 #	STARTUPFILE	-- look for and handle initialization file.
 #
-CFLAGS+= -Wall -DREGEX
+CFLAGS+=-Wall -DREGEX
 
 SRCS=	autoexec.c basic.c bell.c buffer.c cinfo.c dir.c display.c \
 	echo.c extend.c file.c fileio.c funmap.c help.c kbd.c keymap.c \
