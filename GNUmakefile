@@ -26,7 +26,7 @@ OBJS =	autoexec.o basic.o bell.o buffer.o cinfo.o dir.o display.o \
 OBJS +=	cmode.o cscope.o dired.o grep.o tags.o theo.o
 
 #
-# Mg portable files.
+# Mg portable setup.
 #
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
@@ -51,6 +51,8 @@ else ifeq ($(UNAME_S),DragonFly)
 CFLAGS += -D__dead=__dead2 -DLOGIN_NAME_MAX=MAXLOGNAME
 OBJS += portable/common/reallocarray.o
 LIBS += -lutil
+else ifeq ($(UNAME_S),Bitrig)
+$(error Fix your in-base editor)
 endif
 
 all: ${OBJS}
@@ -61,7 +63,7 @@ install: all
 	${INSTALL} -d -m 755 ${DESTDIR}${MANDIR}
 	${INSTALL} -d -m 755 ${DESTDIR}${DOCDIR}
 	${INSTALL} -s -m 555 ${PROG} ${DESTDIR}${PREFIX}/bin
-	${INSTALL} -m 444 ${PROG}.1 ${DESTDIR}${MANDIR}/man1
+	${INSTALL} -m 444 mg.1 ${DESTDIR}${MANDIR}/man1/${PROG}.1
 	${INSTALL} -m 444 README.md ${DESTDIR}${DOCDIR}
 	${INSTALL} -m 444 README-Mg ${DESTDIR}${DOCDIR}
 	${INSTALL} -m 444 tutorial ${DESTDIR}${DOCDIR}

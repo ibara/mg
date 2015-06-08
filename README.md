@@ -26,4 +26,4 @@ All licenses are ISC or BSD.
 
 Get a tarball
 -------------
-http://devio.us/~bcallah/mg-20150604.tar.gz
+http://devio.us/~bcallah/mg/mg-20150608.tar.gz
