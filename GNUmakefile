@@ -53,6 +53,11 @@ OBJS += portable/common/reallocarray.o
 LIBS += -lutil
 else ifeq ($(UNAME_S),Bitrig)
 $(error Fix your in-base editor)
+else ifeq ($(findstring CYGWIN,$(UNAME_S)),CYGWIN)
+CFLAGS += -D_GNU_SOURCE -D__dead="__attribute__((__noreturn__))" -Dst_mtimespec=st_mtim
+OBJS +=	portable/linux/fgetln.o portable/common/fparseln.o \
+	portable/common/reallocarray.o portable/linux/strlcat.o \
+	portable/linux/strlcpy.o portable/common/strtonum.o
 endif
 
 all: ${OBJS}

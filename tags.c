@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#if defined(__linux__)
+#if defined(__linux__) || defined(__CYGWIN__)
 #include "portable/linux/util.h"
 #elif defined(__OpenBSD__) || defined(__NetBSD__)
 #include <util.h>
