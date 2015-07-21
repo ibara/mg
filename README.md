@@ -16,7 +16,7 @@ Type make or gmake, depending on your operating system.
 Testing
 -------
 Tested on recent versions of Arch, Cygwin, Debian, DragonFly BSD, FreeBSD,
-NetBSD, Slackware, and Ubuntu.
+Mac OS X, NetBSD, Slackware, and Ubuntu.
 
 Licensing
 ---------
@@ -26,4 +26,4 @@ All licenses are ISC or BSD.
 
 Get a tarball
 -------------
-http://devio.us/~bcallah/mg/mg-20150629.tar.gz
+http://devio.us/~bcallah/mg/mg-20150721.tar.gz
