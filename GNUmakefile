@@ -52,7 +52,7 @@ CFLAGS += -D__dead=__dead2 -DLOGIN_NAME_MAX=MAXLOGNAME
 OBJS += portable/common/reallocarray.o
 LIBS += -lutil
 else ifeq ($(UNAME_S),Bitrig)
-$(error Fix your in-base editor)
+$(error Type 'make' instead)
 else ifeq ($(findstring CYGWIN,$(UNAME_S)),CYGWIN)
 CFLAGS += -D_GNU_SOURCE -D__dead="__attribute__((__noreturn__))" -Dst_mtimespec=st_mtim
 OBJS +=	portable/linux/fgetln.o portable/common/fparseln.o \
