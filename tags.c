@@ -24,7 +24,7 @@
 #include <unistd.h>
 #if defined(__linux__) || defined(__CYGWIN__)
 #include "portable/linux/util.h"
-#elif defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
+#elif defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__) || defined(__Bitrig__)
 #include <util.h>
 #else
 #include <libutil.h>
