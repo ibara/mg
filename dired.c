@@ -1,4 +1,4 @@
-/*	$OpenBSD: dired.c,v 1.71 2015/03/19 21:48:05 bcallah Exp $	*/
+/*	$OpenBSD: dired.c,v 1.80 2015/10/29 19:46:47 lum Exp $	*/
 
 /* This file is in the public domain. */
 
@@ -53,8 +53,23 @@ static int	 d_killbuffer_cmd(int, int);
 static int	 d_refreshbuffer(int, int);
 static void	 reaper(int);
 static struct buffer	*refreshbuffer(struct buffer *);
+static int	 createlist(struct buffer *);
+static void	 redelete(struct buffer *);
+static char 	 *findfname(struct line *, char *);
 
 extern struct keymap_s helpmap, cXmap, metamap;
+
+const char DDELCHAR = 'D';
+
+/*
+ * Structure which holds a linked list of file names marked for
+ * deletion. Used to maintain dired buffer 'state' between refreshes.
+ */
+struct delentry {
+	SLIST_ENTRY(delentry) entry;
+	char   *fn;
+};
+SLIST_HEAD(slisthead, delentry) delhead = SLIST_HEAD_INITIALIZER(delhead);
 
 static PF dirednul[] = {
 	setmark,		/* ^@ */
@@ -132,7 +147,7 @@ static PF direddl[] = {
 };
 
 static PF diredbp[] = {
-	d_backpage		/* v */	
+	d_backpage		/* v */
 };
 
 static PF dirednull[] = {
@@ -142,7 +157,7 @@ static PF dirednull[] = {
 static struct KEYMAPE (1) d_backpagemap = {
 	1,
 	1,
-	rescan,                 
+	rescan,
 	{
 		{
 		'v', 'v', diredbp, NULL
@@ -162,7 +177,7 @@ static struct KEYMAPE (7) diredmap = {
 			CCHR('L'), CCHR('X'), diredcl, (KEYMAP *) & cXmap
 		},
 		{
-			CCHR('['), CCHR('['), dirednull, (KEYMAP *) & 
+			CCHR('['), CCHR('['), dirednull, (KEYMAP *) &
 			d_backpagemap
 		},
 		{
@@ -271,10 +286,14 @@ d_del(int f, int n)
 	if (n < 0)
 		return (FALSE);
 	while (n--) {
-		if (llength(curwp->w_dotp) > 0)
-			lputc(curwp->w_dotp, 0, 'D');
-		if (lforw(curwp->w_dotp) != curbp->b_headp)
+		if (d_warpdot(curwp->w_dotp, &curwp->w_doto) == TRUE) {
+			lputc(curwp->w_dotp, 0, DDELCHAR);
+			curbp->b_flag |= BFDIREDDEL;
+		}
+		if (lforw(curwp->w_dotp) != curbp->b_headp) {
 			curwp->w_dotp = lforw(curwp->w_dotp);
+			curwp->w_dotline++;
+		}
 	}
 	curwp->w_rflag |= WFEDIT | WFMOVE;
 	return (d_warpdot(curwp->w_dotp, &curwp->w_doto));
@@ -289,8 +308,10 @@ d_undel(int f, int n)
 	while (n--) {
 		if (llength(curwp->w_dotp) > 0)
 			lputc(curwp->w_dotp, 0, ' ');
-		if (lforw(curwp->w_dotp) != curbp->b_headp)
+		if (lforw(curwp->w_dotp) != curbp->b_headp) {
 			curwp->w_dotp = lforw(curwp->w_dotp);
+			curwp->w_dotline++;
+		}
 	}
 	curwp->w_rflag |= WFEDIT | WFMOVE;
 	return (d_warpdot(curwp->w_dotp, &curwp->w_doto));
@@ -303,8 +324,10 @@ d_undelbak(int f, int n)
 	if (n < 0)
 		return (d_undel(f, -n));
 	while (n--) {
-		if (lback(curwp->w_dotp) != curbp->b_headp)
+		if (lback(curwp->w_dotp) != curbp->b_headp) {
 			curwp->w_dotp = lback(curwp->w_dotp);
+			curwp->w_dotline--;
+		}
 		if (llength(curwp->w_dotp) > 0)
 			lputc(curwp->w_dotp, 0, ' ');
 	}
@@ -364,20 +387,27 @@ d_expunge(int f, int n)
 {
 	struct line	*lp, *nlp;
 	char		 fname[NFILEN], sname[NFILEN];
+	int		 tmp;
+
+	tmp = curwp->w_dotline;
+	curwp->w_dotline = 0;
 
 	for (lp = bfirstlp(curbp); lp != curbp->b_headp; lp = nlp) {
+		curwp->w_dotline++;
 		nlp = lforw(lp);
 		if (llength(lp) && lgetc(lp, 0) == 'D') {
 			switch (d_makename(lp, fname, sizeof(fname))) {
 			case ABORT:
 				dobeep();
 				ewprintf("Bad line in dired buffer");
+				curwp->w_dotline = tmp;
 				return (FALSE);
 			case FALSE:
 				if (unlink(fname) < 0) {
 					(void)xbasename(sname, fname, NFILEN);
 					dobeep();
 					ewprintf("Could not delete '%s'", sname);
+					curwp->w_dotline = tmp;
 					return (FALSE);
 				}
 				break;
@@ -387,15 +417,24 @@ d_expunge(int f, int n)
 					dobeep();
 					ewprintf("Could not delete directory "
 					    "'%s'", sname);
+					curwp->w_dotline = tmp;
 					return (FALSE);
 				}
 				break;
 			}
 			lfree(lp);
 			curwp->w_bufp->b_lines--;
+			if (tmp > curwp->w_dotline)
+				tmp--;
 			curwp->w_rflag |= WFFULL;
 		}
 	}
+	curwp->w_dotline = tmp;
+	d_warpdot(curwp->w_dotp, &curwp->w_doto);
+
+	/* we have deleted all items successfully, remove del flag */
+	curbp->b_flag &= ~BFDIREDDEL;
+
 	return (TRUE);
 }
 
@@ -423,7 +462,7 @@ d_copy(int f, int n)
 	(void)xbasename(sname, frname, NFILEN);
 	bufp = eread("Copy %s to: ", toname, sizeof(toname),
 	    EFDEF | EFNEW | EFCR, sname);
-	if (bufp == NULL) 
+	if (bufp == NULL)
 		return (ABORT);
 	else if (bufp[0] == '\0')
 		return (FALSE);
@@ -674,26 +713,54 @@ d_refreshbuffer(int f, int n)
 	return (showbuffer(bp, curwp, WFFULL | WFMODE));
 }
 
+/*
+ * Kill then re-open the requested dired buffer.
+ * If required, take a note of any files marked for deletion. Then once
+ * the buffer has been re-opened, remark the same files as deleted.
+ */
 struct buffer *
 refreshbuffer(struct buffer *bp)
 {
-	char	*tmp;
+	char		*tmp_b_fname;
+	int	 	 i, tmp_w_dotline, ddel = 0;
 
-	tmp = strdup(bp->b_fname);
-	if (tmp == NULL) {
+	/* remember directory path to open later */
+	tmp_b_fname = strdup(bp->b_fname);
+	if (tmp_b_fname == NULL) {
 		dobeep();
 		ewprintf("Out of memory");
 		return (NULL);
 	}
+	tmp_w_dotline = curwp->w_dotline;
+
+	/* create a list of files for deletion */
+	if (bp->b_flag & BFDIREDDEL)
+		ddel = createlist(bp);
 
 	killbuffer(bp);
 
 	/* dired_() uses findbuffer() to create new buffer */
-	if ((bp = dired_(tmp)) == NULL) {
-		free(tmp);
+	if ((bp = dired_(tmp_b_fname)) == NULL) {
+		free(tmp_b_fname);
 		return (NULL);
 	}
-	free(tmp);
+	free(tmp_b_fname);
+
+	/* remark any previously deleted files with a 'D' */
+	if (ddel)
+		redelete(bp);		
+
+	/* find dot line */
+	bp->b_dotp = bfirstlp(bp);
+	if (tmp_w_dotline > bp->b_lines)
+		tmp_w_dotline = bp->b_lines - 1;
+	for (i = 1; i < tmp_w_dotline; i++)
+		bp->b_dotp = lforw(bp->b_dotp);
+
+	bp->b_dotline = i;
+	bp->b_doto = 0;
+	d_warpdot(bp->b_dotp, &bp->b_doto);
+
 	curbp = bp;
 
 	return (bp);
@@ -747,13 +814,13 @@ d_warpdot(struct line *dotp, int *doto)
 }
 
 static int
-d_forwpage(int f, int n) 
+d_forwpage(int f, int n)
 {
 	forwpage(f | FFRAND, n);
 	return (d_warpdot(curwp->w_dotp, &curwp->w_doto));
 }
 
-static int 
+static int
 d_backpage (int f, int n)
 {
 	backpage(f | FFRAND, n);
@@ -784,7 +851,7 @@ dired_(char *dname)
 	int		 i;
 	size_t		 len;
 
-	if ((dname = adjustname(dname, FALSE)) == NULL) {
+	if ((dname = adjustname(dname, TRUE)) == NULL) {
 		dobeep();
 		ewprintf("Bad directory name");
 		return (NULL);
@@ -798,17 +865,20 @@ dired_(char *dname)
 	if ((access(dname, R_OK | X_OK)) == -1) {
 		if (errno == EACCES) {
 			dobeep();
-			ewprintf("Permission denied");
+			ewprintf("Permission denied: %s", dname);
 		}
 		return (NULL);
 	}
-	if ((bp = findbuffer(dname)) == NULL) {
-		dobeep();
-		ewprintf("Could not create buffer");
-		return (NULL);
+	for (bp = bheadp; bp != NULL; bp = bp->b_bufp) {
+		if (strcmp(bp->b_fname, dname) == 0) {
+			if (fchecktime(bp) != TRUE)
+				ewprintf("Directory has changed on disk;"
+				    " type g to update Dired");
+			return (bp);
+		}
+
 	}
-	if (bclear(bp) != TRUE)
-		return (NULL);
+	bp = bfind(dname, TRUE);
 	bp->b_flag |= BFREADONLY | BFIGNDIRTY;
 
 	if ((d_exec(2, bp, NULL, "ls", "-al", dname, NULL)) != TRUE)
@@ -816,8 +886,10 @@ dired_(char *dname)
 
 	/* Find the line with ".." on it. */
 	bp->b_dotp = bfirstlp(bp);
+	bp->b_dotline = 1;
 	for (i = 0; i < bp->b_lines; i++) {
 		bp->b_dotp = lforw(bp->b_dotp);
+		bp->b_dotline++;
 		if (d_warpdot(bp->b_dotp, &bp->b_doto) == FALSE)
 			continue;
 		if (strcmp(ltext(bp->b_dotp) + bp->b_doto, "..") == 0)
@@ -825,8 +897,10 @@ dired_(char *dname)
 	}
 
 	/* We want dot on the entry right after "..", if possible. */
-	if (++i < bp->b_lines - 2)
+	if (++i < bp->b_lines - 2) {
 		bp->b_dotp = lforw(bp->b_dotp);
+		bp->b_dotline++;
+	}
 	d_warpdot(bp->b_dotp, &bp->b_doto);
 
 	(void)strlcpy(bp->b_fname, dname, sizeof(bp->b_fname));
@@ -837,6 +911,128 @@ dired_(char *dname)
 		ewprintf("Could not find mode dired");
 		return (NULL);
 	}
+	(void)fupdstat(bp);
 	bp->b_nmodes = 1;
 	return (bp);
+}
+
+/*
+ * Iterate through the lines of the dired buffer looking for files
+ * collected in the linked list made in createlist(). If a line is found
+ * replace 'D' as first char in a line. As lines are found, remove the
+ * corresponding item from the linked list. Iterate for as long as there
+ * are items in the linked list or until end of buffer is found.
+ */
+void
+redelete(struct buffer *bp)
+{
+	struct delentry	*d1 = NULL;
+	struct line	*lp, *nlp;
+	char		 fname[NFILEN];
+	char		*p = fname;
+	size_t		 plen, fnlen;
+	int		 finished = 0;
+
+	/* reset the deleted file buffer flag until a deleted file is found */
+	bp->b_flag &= ~BFDIREDDEL;
+
+	for (lp = bfirstlp(bp); lp != bp->b_headp; lp = nlp) {	
+		bp->b_dotp = lp;
+		if ((p = findfname(lp, p)) == NULL) {
+			nlp = lforw(lp);
+			continue;
+		}
+		plen = strlen(p);
+		SLIST_FOREACH(d1, &delhead, entry) {
+			fnlen = strlen(d1->fn);
+			if ((plen == fnlen) && 
+			    (strncmp(p, d1->fn, plen) == 0)) {
+				lputc(bp->b_dotp, 0, DDELCHAR);
+				bp->b_flag |= BFDIREDDEL;
+				SLIST_REMOVE(&delhead, d1, delentry, entry);
+				if (SLIST_EMPTY(&delhead)) {
+					finished = 1;
+					break;
+				}	
+			}
+		}
+		if (finished)
+			break;
+		nlp = lforw(lp);
+	}
+	while (!SLIST_EMPTY(&delhead)) {
+		d1 = SLIST_FIRST(&delhead);
+		SLIST_REMOVE_HEAD(&delhead, entry);
+		free(d1->fn);
+		free(d1);
+	}
+	return;
+}
+
+/*
+ * Create a list of files marked for deletion.
+ */
+int
+createlist(struct buffer *bp)
+{
+	struct delentry	*d1 = NULL, *d2;
+	struct line	*lp, *nlp;
+	char		 fname[NFILEN];
+	char		*p = fname;
+	int		 ret = FALSE;
+
+	for (lp = bfirstlp(bp); lp != bp->b_headp; lp = nlp) {
+		/* 
+		 * Check if the line has 'D' on the first char and if a valid
+		 * filename can be extracted from it.
+		 */
+		if (((lp->l_text[0] != DDELCHAR)) ||
+		    ((p = findfname(lp, p)) == NULL)) {
+			nlp = lforw(lp);
+			continue;
+		}
+		if (SLIST_EMPTY(&delhead)) {
+			if ((d1 = malloc(sizeof(struct delentry)))
+			     == NULL)
+				return (ABORT);
+			if ((d1->fn = strdup(p)) == NULL) {
+				free(d1);
+				return (ABORT);
+			}
+			SLIST_INSERT_HEAD(&delhead, d1, entry);
+		} else {
+			if ((d2 = malloc(sizeof(struct delentry)))
+			     == NULL) {
+				free(d1->fn);
+				free(d1);
+				return (ABORT);
+			}
+			if ((d2->fn = strdup(p)) == NULL) {
+				free(d1->fn);
+				free(d1);
+				free(d2);
+				return (ABORT);
+			}
+			SLIST_INSERT_AFTER(d1, d2, entry);
+			d1 = d2;				
+		}
+		ret = TRUE;
+		nlp = lforw(lp);
+	}
+	return (ret);
+}
+
+/*
+ * Look for and extract a file name on a dired buffer line.
+ */
+char *
+findfname(struct line *lp, char *fn)
+{
+	int start;
+
+	(void)d_warpdot(lp, &start);
+	if (start < 1)
+		return NULL;
+	fn = &lp->l_text[start];
+	return fn;
 }

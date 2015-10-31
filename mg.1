@@ -1,7 +1,7 @@
-.\"	$OpenBSD: mg.1,v 1.90 2015/03/17 15:20:38 jmc Exp $
+.\"	$OpenBSD: mg.1,v 1.94 2015/10/12 07:55:52 lum Exp $
 .\" This file is in the public domain.
 .\"
-.Dd $Mdocdate: March 17 2015 $
+.Dd $Mdocdate: October 12 2015 $
 .Dt MG 1
 .Os
 .Sh NAME
@@ -292,6 +292,8 @@ capitalize-word
 kill-word
 .It M-f
 forward-word
+.It M-h
+mark-paragraph
 .It M-l
 downcase-word
 .It M-m
@@ -672,6 +674,10 @@ Unbind a key mapping in the local (topmost) mode.
 Toggle generation of backup files.
 .It make-directory
 Prompt the user for a path or directory name which is then created.
+.It mark-paragraph
+Mark
+.Va n
+paragraphs.
 .It mark-whole-buffer
 Marks whole buffer as a region by putting dot at the beginning and mark
 at the end of buffer.
@@ -870,6 +876,12 @@ Toggle the read-only flag on the current buffer.
 Transpose the two characters in front of and under dot,
 then move forward one character.
 Treat newline characters the same as any other.
+.It transpose-paragraphs
+Transpose adjacent paragraphs.
+If multiple iterations are requested, the current paragraph will
+be moved
+.Va n
+paragraphs forward.
 .It undo
 Undo the most recent action.
 If invoked again without an intervening command,
@@ -979,7 +991,7 @@ If the cursor is on a directory it will be opened in dired mode.
 .It dired-flag-file-deletion
 Flag the file listed on the current line for deletion.
 This is indicated in the buffer by putting a D at the left margin.
-No files are actually deleted until the function dired-do-deletions
+No files are actually deleted until the function dired-do-flagged-delete
 is executed.
 .It dired-find-file-other-window
 Open the file on the current line of the dired buffer in a

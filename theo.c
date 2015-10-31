@@ -1,4 +1,4 @@
-/*	$OpenBSD: theo.c,v 1.146 2015/03/19 21:48:05 bcallah Exp $	*/
+/*	$OpenBSD: theo.c,v 1.148 2015/10/29 15:42:01 tedu Exp $	*/
 /*
  * Copyright (c) 2002 Artur Grabowski <art@openbsd.org>
  * All rights reserved.
@@ -78,7 +78,7 @@ theo(int f, int n)
 
 	curbp = bp;
 	curwp = wp;
-	onlywind(f, n);
+	(void)onlywind(FFRAND, 1);
 
 	return (TRUE);
 }
@@ -193,6 +193,7 @@ static const char *talk[] = {
 	"Kill the past with fire, and declare Duran Duran is less cool today.  Await remixes of the same thing performed by new talent.",
 	"Where did my \"fuck backwards compat\" compatriots go?",
 	"I want a new vax, one that's not so slow.",
+	"This sausage is made from unsound meat.",
 };
 
 static const int ntalk = sizeof(talk)/sizeof(talk[0]);

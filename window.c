@@ -1,4 +1,4 @@
-/*	$OpenBSD: window.c,v 1.33 2015/03/25 20:53:31 bcallah Exp $	*/
+/*	$OpenBSD: window.c,v 1.35 2015/10/29 20:20:49 lum Exp $	*/
 
 /* This file is in the public domain. */
 
@@ -167,6 +167,8 @@ onlywind(int f, int n)
 			wp->w_bufp->b_doto = wp->w_doto;
 			wp->w_bufp->b_markp = wp->w_markp;
 			wp->w_bufp->b_marko = wp->w_marko;
+			wp->w_bufp->b_dotline = wp->w_dotline;
+			wp->w_bufp->b_markline = wp->w_markline;
 		}
 		free(wp);
 	}
@@ -178,6 +180,8 @@ onlywind(int f, int n)
 			wp->w_bufp->b_doto = wp->w_doto;
 			wp->w_bufp->b_markp = wp->w_markp;
 			wp->w_bufp->b_marko = wp->w_marko;
+			wp->w_bufp->b_dotline = wp->w_dotline;
+			wp->w_bufp->b_markline = wp->w_markline;
 		}
 		free(wp);
 	}
@@ -360,7 +364,7 @@ shrinkwind(int f, int n)
 		return (FALSE);
 	}
 	/*
-	 * Bit of flakiness - KRANDOM means it was an internal call, and
+	 * Bit of flakiness - FFRAND means it was an internal call, and
 	 * to be trusted implicitly about sizes.
 	 */
 	if (!(f & FFRAND) && curwp->w_ntrows <= n) {

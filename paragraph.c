@@ -1,4 +1,4 @@
-/*	$OpenBSD: paragraph.c,v 1.36 2015/03/19 21:22:15 bcallah Exp $	*/
+/*	$OpenBSD: paragraph.c,v 1.41 2015/10/10 09:13:14 lum Exp $	*/
 
 /* This file is in the public domain. */
 
@@ -19,6 +19,9 @@
 static int	fillcol = 70;
 
 #define MAXWORD 256
+
+static int	findpara(void);
+static int 	do_gotoeop(int, int, int *);
 
 /*
  * Move to start of paragraph.
@@ -70,7 +73,15 @@ gotobop(int f, int n)
 int
 gotoeop(int f, int n)
 {
-	int col, nospace;
+	int i;
+
+	return(do_gotoeop(f, n, &i));
+}
+
+int
+do_gotoeop(int f, int n, int *i)
+{
+	int col, nospace, j = 0;
 
 	/* the other way... */
 	if (n < 0)
@@ -78,6 +89,7 @@ gotoeop(int f, int n)
 
 	/* for each one asked for */
 	while (n-- > 0) {
+		*i = ++j;
 		nospace = 0;
 		while (lforw(curwp->w_dotp) != curbp->b_headp) {
 			col = 0;
@@ -129,6 +141,9 @@ fillpara(int f, int n)
 	int	 retval;	/* return value				*/
 	struct line	*eopline;	/* pointer to line just past EOP	*/
 	char	 wbuf[MAXWORD];	/* buffer for current word		*/
+
+	if (n == 0)
+		return (TRUE);
 
 	undo_boundary_enable(FFRAND, 0);
 
@@ -245,38 +260,143 @@ cleanup:
 }
 
 /*
- * Delete a paragraph.  Delete n paragraphs starting with the current one.
+ * Delete n paragraphs. Move to the beginning of the current paragraph, or if
+ * the cursor is on an empty line, move down the buffer to the first line with
+ * non-space characters. Then mark n paragraphs and delete.
  */
 /* ARGSUSED */
 int
 killpara(int f, int n)
 {
-	int	status, end = FALSE;	/* returned status of functions */
+	int	lineno, status;
 
-	/* for each paragraph to delete */
-	while (n--) {
+	if (n == 0)
+		return (TRUE);
 
-		/* mark out the end and beginning of the para to delete */
-		if (!gotoeop(FFRAND, 1))
-			end = TRUE;
+	if (findpara() == FALSE)
+		return (TRUE);
 
-		/* set the mark here */
-		curwp->w_markp = curwp->w_dotp;
-		curwp->w_marko = curwp->w_doto;
+	/* go to the beginning of the paragraph */
+	(void)gotobop(FFRAND, 1);
 
-		/* go to the beginning of the paragraph */
-		(void)gotobop(FFRAND, 1);
+	/* take a note of the line number for after deletions and set mark */
+	lineno = curwp->w_dotline;
+	curwp->w_markp = curwp->w_dotp;
+	curwp->w_marko = curwp->w_doto;
 
-		/* force us to the beginning of line */
-		curwp->w_doto = 0;
+	(void)gotoeop(FFRAND, n);
 
-		/* and delete it */
-		if ((status = killregion(FFRAND, 1)) != TRUE)
-			return (status);
+	if ((status = killregion(FFRAND, 1)) != TRUE)
+		return (status);
 
-		if (end)
-			return (TRUE);
+	curwp->w_dotline = lineno;
+	return (TRUE);
+}
+
+/*
+ * Mark n paragraphs starting with the n'th and working our way backwards.
+ * This leaves the cursor at the beginning of the paragraph where markpara()
+ * was invoked.
+ */
+/* ARGSUSED */
+int
+markpara(int f, int n)
+{
+	int i = 0;
+
+	if (n == 0)
+		return (TRUE);
+
+	clearmark(FFARG, 0);
+
+	if (findpara() == FALSE)
+		return (TRUE);
+
+	(void)do_gotoeop(FFRAND, n, &i);
+
+	/* set the mark here */
+	curwp->w_markp = curwp->w_dotp;
+	curwp->w_marko = curwp->w_doto;
+
+	(void)gotobop(FFRAND, i);
+
+	return (TRUE);
+}
+
+/*
+ * Transpose the current paragraph with the following paragraph. If invoked
+ * multiple times, transpose to the n'th paragraph. If invoked between 
+ * paragraphs, move to the previous paragraph, then continue.
+ */
+/* ARGSUSED */
+int
+transposepara(int f, int n)
+{
+	int	i = 0, status;
+	char	flg;
+
+	if (n == 0)
+		return (TRUE);
+
+	/* find a paragraph, set mark, then goto the end */
+	gotobop(FFRAND, 1);
+	curwp->w_markp = curwp->w_dotp;
+	curwp->w_marko = curwp->w_doto;
+	(void)gotoeop(FFRAND, 1);
+
+	/* take a note of buffer flags - we may need them */
+	flg = curbp->b_flag;	
+
+	/* clean out kill buffer then kill region */
+	kdelete();
+	if ((status = killregion(FFRAND, 1)) != TRUE)
+		return (status);
+
+	/* 
+	 * Now step through n paragraphs. If we reach the end of buffer,
+	 * stop and paste the killed region back, then display a message.
+	 */
+	if (do_gotoeop(FFRAND, n, &i) == FALSE) {
+		ewprintf("Cannot transpose paragraph, end of buffer reached.");
+		(void)gotobop(FFRAND, i);
+		(void)yank(FFRAND, 1);
+		curbp->b_flag = flg;	
+		return (FALSE);
 	}
+	(void)yank(FFRAND, 1);
+
+	return (TRUE);
+}
+
+/*
+ * Go down the buffer until we find a line with non-space characters.
+ */
+int
+findpara(void)
+{
+	int	col, nospace = 0;
+
+	/* we move forward to find a para to mark */
+	do {
+		curwp->w_doto = 0;
+		col = 0;
+
+		/* check if we are on a blank line */
+		while (col < llength(curwp->w_dotp)) {
+			if (!isspace(lgetc(curwp->w_dotp, col)))
+				nospace = 1;
+			col++;
+		}
+		if (nospace)
+			break;
+
+		if (lforw(curwp->w_dotp) == curbp->b_headp)
+			return (FALSE);
+
+		curwp->w_dotp = lforw(curwp->w_dotp);	
+		curwp->w_dotline++;
+	} while (1);
+
 	return (TRUE);
 }
 
