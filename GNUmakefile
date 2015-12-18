@@ -65,7 +65,7 @@ all: ${OBJS}
 
 install: all
 	${INSTALL} -d -m 755 ${DESTDIR}${PREFIX}/bin
-	${INSTALL} -d -m 755 ${DESTDIR}${MANDIR}
+	${INSTALL} -d -m 755 ${DESTDIR}${MANDIR}/man1
 	${INSTALL} -d -m 755 ${DESTDIR}${DOCDIR}
 	${INSTALL} -s -m 555 ${PROG} ${DESTDIR}${PREFIX}/bin
 	${INSTALL} -m 444 mg.1 ${DESTDIR}${MANDIR}/man1/${PROG}.1
