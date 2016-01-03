@@ -92,13 +92,17 @@ main(int argc, char **argv)
 	 */
 	{
 		extern void grep_init(void);
+#ifndef NO_THEO
 		extern void theo_init(void);
+#endif
 		extern void cmode_init(void);
 		extern void dired_init(void);
 
 		dired_init();
 		grep_init();
+#ifndef NO_THEO
 		theo_init();
+#endif
 		cmode_init();
 	}
 

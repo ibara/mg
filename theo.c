@@ -24,6 +24,7 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef NO_THEO
 #include <sys/queue.h>
 #include <signal.h>
 #include <stdio.h>
@@ -224,3 +225,4 @@ theo_analyze(int f, int n)
 
 	return (TRUE);
 }
+#endif /* NO_THEO */

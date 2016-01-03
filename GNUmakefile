@@ -9,8 +9,11 @@ MANDIR ?= ${PREFIX}/man
 DOCDIR ?= ${PREFIX}/share/doc/mg
 INSTALL = /usr/bin/install
 
+# CFLAGS:
+# -DREGEX	-- Enable regex search commands
+# -DNO_THEO	-- Disable M-x theo command
 CFLAGS ?= -O2 -pipe
-CFLAGS += -Wall -DREGEX
+CFLAGS += -Wall -DREGEX -DNO_THEO
 
 LIBS = -lcurses
 
