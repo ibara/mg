@@ -6,12 +6,14 @@ version of Mg found in the OpenBSD base system.
 
 Mg is intended to be a small, fast, and portable editor for people who
 can't (or don't want to) run emacs for one reason or another, or are not
-familiar with the vi editor.  It is compatible with emacs because there
+familiar with the vi editor. It is compatible with emacs because there
 shouldn't be any reason to learn more editor types than emacs or vi.
 
 Compiling
 ---------
 Type make or gmake, depending on your operating system.
+FreeBSD, NetBSD, and DragonFly BSD should type `gmake`.
+All other operating systems should type `make`.
 
 Testing
 -------
@@ -26,4 +28,4 @@ All licenses are ISC or BSD.
 
 Get a tarball
 -------------
-http://devio.us/~bcallah/mg/mg-20160103.tar.gz
+http://devio.us/~bcallah/mg/mg-20160725.tar.gz

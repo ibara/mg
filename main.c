@@ -1,4 +1,4 @@
-/*	$OpenBSD: main.c,v 1.81 2015/12/24 09:07:47 lum Exp $	*/
+/*	$OpenBSD: main.c,v 1.83 2016/07/14 08:31:18 semarie Exp $	*/
 
 /* This file is in the public domain. */
 
@@ -27,6 +27,7 @@ int		 curgoal;			/* goal column		*/
 int		 startrow;			/* row to start		*/
 int		 doaudiblebell;			/* audible bell toggle	*/
 int		 dovisiblebell;			/* visible bell toggle	*/
+int		 dblspace;			/* sentence end #spaces	*/
 struct buffer	*curbp;				/* current buffer	*/
 struct buffer	*bheadp;			/* BUFFER list head	*/
 struct mgwin	*curwp;				/* current window	*/
@@ -57,7 +58,8 @@ main(int argc, char **argv)
 	struct buffer	*bp = NULL;
 
 #ifdef __OpenBSD__
-	if (pledge("stdio rpath wpath cpath fattr getpw tty proc exec", NULL) == -1)
+	if (pledge("stdio rpath wpath cpath fattr chown getpw tty proc exec",
+	    NULL) == -1)
 		err(1, "pledge");
 #endif
 
@@ -92,7 +94,7 @@ main(int argc, char **argv)
 	 */
 	{
 		extern void grep_init(void);
-#ifndef NO_THEO
+#ifdef WITH_THEO
 		extern void theo_init(void);
 #endif
 		extern void cmode_init(void);
@@ -100,7 +102,7 @@ main(int argc, char **argv)
 
 		dired_init();
 		grep_init();
-#ifndef NO_THEO
+#ifdef WITH_THEO
 		theo_init();
 #endif
 		cmode_init();
@@ -115,6 +117,7 @@ main(int argc, char **argv)
 	edinit(bp);		/* Buffers, windows.		*/
 	ttykeymapinit();	/* Symbols, bindings.		*/
 	bellinit();		/* Audible and visible bell.	*/
+	dblspace = 1;		/* two spaces for sentence end. */
 
 	/*
 	 * doing update() before reading files causes the error messages from

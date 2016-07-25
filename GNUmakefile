@@ -11,9 +11,9 @@ INSTALL = /usr/bin/install
 
 # CFLAGS:
 # -DREGEX	-- Enable regex search commands
-# -DNO_THEO	-- Disable M-x theo command
+# -DWITH_THEO	-- Enable M-x theo command
 CFLAGS ?= -O2 -pipe
-CFLAGS += -Wall -DREGEX -DNO_THEO
+CFLAGS += -Wall -DREGEX
 
 LIBS = -lcurses
 
