@@ -18,7 +18,7 @@ All other operating systems should type `make`.
 Testing
 -------
 Tested on recent versions of Arch, Cygwin, Debian, DragonFly BSD, FreeBSD,
-Mac OS X, NetBSD, Slackware, and Ubuntu.
+Mac OS X (10.10 or later), NetBSD, Slackware, and Ubuntu.
 
 Licensing
 ---------
