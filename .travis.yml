@@ -6,3 +6,4 @@ compiler:
   - clang
   - gcc
 script: make
+osx_image: xcode6.4

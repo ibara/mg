@@ -39,8 +39,8 @@ OBJS +=	portable/linux/fgetln.o portable/common/fparseln.o \
 	portable/linux/strlcpy.o portable/common/strtonum.o
 else ifeq ($(UNAME_S),Darwin)
 CFLAGS += -DMSG_NOSIGNAL=SO_NOSIGPIPE -DLOGIN_NAME_MAX=MAXLOGNAME
-OBJS += portable/common/fparseln.o portable/common/reallocarray.o \
-	portable/common/strtonum.o
+OBJS += portable/common/fparseln.o portable/common/futimens.o \
+	portable/common/reallocarray.o portable/common/strtonum.o
 LIBS += -lutil
 else ifeq ($(UNAME_S),FreeBSD)
 CFLAGS += -D__dead=__dead2 -DLOGIN_NAME_MAX=MAXLOGNAME
