@@ -2,8 +2,8 @@
 mg
 ==
 This is a portable version of the Mg editor from OpenBSD by the former
-OpenBSD developer who recently did a bunch of overhaul work on the
-version of Mg found in the OpenBSD base system.
+OpenBSD developer who did a bunch of overhaul work on the version of Mg
+found in the OpenBSD base system.
 
 Mg is intended to be a small, fast, and portable editor for people who
 can't (or don't want to) run emacs for one reason or another, or are not
@@ -29,4 +29,4 @@ All licenses are ISC or BSD.
 
 Get a tarball
 -------------
-http://devio.us/~bcallah/mg/mg-20160815.tar.gz
+http://devio.us/~bcallah/mg/mg-20160905.tar.gz
