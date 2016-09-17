@@ -11,7 +11,7 @@ INSTALL = /usr/bin/install
 
 # CFLAGS:
 # -DREGEX	-- Enable regex search commands
-# -DWITH_THEO	-- Enable M-x theo command
+# -DSTARTUPFILE	-- Look for and handle initialization file
 CFLAGS ?= -O2 -pipe
 CFLAGS += -Wall -DREGEX
 
@@ -26,7 +26,7 @@ OBJS =	autoexec.o basic.o bell.o buffer.o cinfo.o dir.o display.o \
 #
 # More or less standalone extensions.
 #
-OBJS +=	cmode.o cscope.o dired.o grep.o tags.o theo.o
+OBJS +=	cmode.o cscope.o dired.o grep.o tags.o
 
 #
 # Mg portable setup.
