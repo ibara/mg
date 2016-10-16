@@ -19,12 +19,6 @@
 #define st_mtim st_mtimespec
 #define st_ctim st_ctimespec
 
-/* From OpenBSD sys/queue.h */
-#define SLIST_FOREACH_SAFE(var, head, field, tvar)	\
-    for ((var) = SLIST_FIRST(head);			\
-	(var) && ((tvar) = SLIST_NEXT(var, field), 1);	\
-	(var) = (tvar))
-
 /* Functions */
 char *fparseln(FILE *, size_t *, size_t *, const char[3], int);
 void *reallocarray(void *, size_t, size_t);

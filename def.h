@@ -13,6 +13,7 @@
 /*
  * We open with Mg portable things.
  */
+#include "portable/common/common.h"
 #if defined(__linux__) || defined(__CYGWIN__)
 #include "portable/linux/linux.h"
 #endif
