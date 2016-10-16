@@ -47,7 +47,7 @@ CFLAGS += -D__dead=__dead2 -DLOGIN_NAME_MAX=MAXLOGNAME
 OBJS += portable/common/reallocarray.o
 LIBS += -lutil
 else ifeq ($(UNAME_S),OpenBSD)
-$(error Type 'make' instead)
+LIBS +=	-lutil
 else ifeq ($(UNAME_S),NetBSD)
 OBJS += portable/common/reallocarray.o portable/common/strtonum.o
 else ifeq ($(UNAME_S),DragonFly)
@@ -55,7 +55,7 @@ CFLAGS += -D__dead=__dead2 -DLOGIN_NAME_MAX=MAXLOGNAME
 OBJS += portable/common/reallocarray.o
 LIBS += -lutil
 else ifeq ($(UNAME_S),Bitrig)
-$(error Type 'make' instead)
+LIBS += -lutil
 else ifeq ($(findstring CYGWIN,$(UNAME_S)),CYGWIN)
 CFLAGS += -D_GNU_SOURCE -D__dead="__attribute__((__noreturn__))" -Dst_mtimespec=st_mtim
 OBJS +=	portable/linux/fgetln.o portable/common/fparseln.o \
