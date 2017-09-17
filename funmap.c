@@ -83,6 +83,7 @@ static struct funmap functnames[] = {
 	{desckey, "describe-key-briefly",},
 	{diffbuffer, "diff-buffer-with-file",},
 	{digit_argument, "digit-argument",},
+	{nonewlineprompt, "disable-newline-prompt",},
 	{lowerregion, "downcase-region",},
 	{lowerword, "downcase-word",},
 	{showversion, "emacs-version",},

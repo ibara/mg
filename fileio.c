@@ -33,6 +33,16 @@ static int   bkupleavetmp(const char *);
 static char *bkupdir;
 static int   leavetmp = 0;	/* 1 = leave any '~' files in tmp dir */
 
+static int   shownlprompt = TRUE;
+
+/* Don't check for a newline at the end of a file. */
+int
+nonewlineprompt(int f, int n)
+{
+	shownlprompt = FALSE;
+	return (TRUE);
+}
+
 /*
  * Open a file for reading.
  */
@@ -167,7 +177,7 @@ ffputbuf(FILE *ffp, struct buffer *bp)
 	/*
 	 * XXX should be variable controlled (once we have variables)
 	 */
-	if (llength(lback(lpend)) != 0) {
+	if (shownlprompt && (llength(lback(lpend)) != 0)) {
 		if (eyorn("No newline at end of file, add one") == TRUE) {
 			lnewline_at(lback(lpend), llength(lback(lpend)));
 			putc('\n', ffp);

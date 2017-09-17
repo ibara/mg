@@ -480,6 +480,7 @@ int		 getxtra(struct list *, struct list *, int, int);
 void		 free_file_list(struct list *);
 
 /* fileio.c */
+int		 nonewlineprompt(int, int);
 int		 ffropen(FILE **, const char *, struct buffer *);
 void		 ffstat(FILE *, struct buffer *);
 int		 ffwopen(FILE **, const char *, struct buffer *);
