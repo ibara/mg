@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/ibara/mg.svg?branch=master)](https://travis-ci.org/ibara/mg)
+
 mg
 ==
 This is a portable version of the Mg editor from OpenBSD by an OpenBSD
@@ -29,4 +30,4 @@ All licenses are ISC or BSD.
 
 Get a tarball
 -------------
-http://devio.us/~bcallah/mg/mg-20170515.tar.gz
+http://devio.us/~bcallah/mg/mg-20170917.tar.gz
