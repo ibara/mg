@@ -768,3 +768,9 @@ int		 tceeol;
 int		 tcinsl;
 int		 tcdell;
 int		 rptcount;	/* successive invocation count */
+
+/*
+ * Extensions.
+ */
+extern int		  shownlprompt;
+int			  togglenewlineprompt(int, int);

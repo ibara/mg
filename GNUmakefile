@@ -29,6 +29,11 @@ OBJS =	autoexec.o basic.o bell.o buffer.o cinfo.o dir.o display.o \
 OBJS +=	cmode.o cscope.o dired.o grep.o tags.o
 
 #
+# Extensions unique to Mg portable.
+#
+OBJS +=	extensions.o
+
+#
 # Mg portable setup.
 #
 UNAME_S := $(shell uname -s)

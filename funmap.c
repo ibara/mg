@@ -199,7 +199,10 @@ static struct funmap functnames[] = {
 	{spawncli, "suspend-emacs",},
 	{usebuffer, "switch-to-buffer",},
 	{poptobuffer, "switch-to-buffer-other-window",},
-	{togglereadonly, "toggle-read-only" },
+#ifndef NOEXTENSIONS
+	{togglenewlineprompt, "toggle-newline-prompt",},
+#endif /* NOEXTENSIONS */
+	{togglereadonly, "toggle-read-only",},
 	{twiddle, "transpose-chars",},
 	{transposepara, "transpose-paragraphs",},
 	{transposeword, "transpose-words",},
