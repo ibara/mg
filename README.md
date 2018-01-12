@@ -11,6 +11,8 @@ can't (or don't want to) run emacs for one reason or another, or are not
 familiar with the vi editor. It is compatible with emacs because there
 shouldn't be any reason to learn more editor types than emacs or vi.
 
+This repository aggressively tracks upstream.
+
 Compiling
 ---------
 Type make or gmake, depending on your operating system.
@@ -30,4 +32,4 @@ All licenses are ISC or BSD.
 
 Get a tarball
 -------------
-http://devio.us/~bcallah/mg/mg-20171227.tar.gz
+http://devio.us/~bcallah/mg/mg-20180111.tar.gz
