@@ -32,4 +32,4 @@ All licenses are ISC or BSD.
 
 Get a tarball
 -------------
-http://devio.us/~bcallah/mg/mg-20180111.tar.gz
+http://devio.us/~bcallah/mg/mg-20180421.tar.gz
