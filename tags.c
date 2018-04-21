@@ -9,7 +9,7 @@
 #include <sys/queue.h>
 #include <sys/stat.h>
 #if defined(__linux__) || defined(__DragonFly__) || defined(__APPLE__)
-#include "portable/common/tree.h"
+#include "tree.h"
 #else
 #include <sys/tree.h>
 #endif
@@ -23,8 +23,8 @@
 #include <string.h>
 #include <unistd.h>
 #if defined(__linux__) || defined(__CYGWIN__)
-#include "portable/linux/util.h"
-#elif defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__) || defined(__Bitrig__)
+#include "util.h"
+#elif defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
 #include <util.h>
 #else
 #include <libutil.h>

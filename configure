@@ -1,0 +1,419 @@
+#!/bin/sh
+
+# This configure script written by Brian Callahan <bcallah@openbsd.org>
+# and released into the Public Domain.
+
+cccheck() {
+  if [ ! -z "$CC" ] ; then
+cat << EOF > conftest.c
+int main(void){return 0;}
+EOF
+    $CC -o conftest conftest.c > /dev/null 2>&1
+    if [ $? -eq 0 ] ; then
+      ./conftest
+      if [ $? -eq 0 ] ; then
+	rm -f conftest conftest.c
+	cc="$CC"
+	return 0
+      else
+	echo "could not build working executables"
+	echo "Please ensure your C compiler is a native compiler"
+	exit 1
+      fi
+    else
+      rm -f conftest conftest.c
+    fi
+  fi
+
+  for compiler in cc clang pcc xlc gcc ; do
+cat << EOF > conftest.c
+int main(void){return 0;}
+EOF
+
+    $compiler -o conftest conftest.c > /dev/null 2>&1
+
+    if [ $? -eq 0 ] ; then
+      ./conftest
+      if [ $? -eq 0 ] ; then
+	rm -f conftest conftest.c
+	cc="$compiler"
+	return 0
+      else
+	echo "could not build working executables"
+	echo "Please ensure your C compiler is a native compiler"
+	exit 1
+      fi
+    else
+      rm -f conftest conftest.c
+    fi
+  done
+  return 1
+}
+
+fgetlncheck() {
+  cat << EOF > conftest.c
+#include <stdio.h>
+int main(void){fgetln(NULL,NULL);return 0;}
+EOF
+  $cc $tflags -o conftest conftest.c > /dev/null 2>&1
+  if [ $? -eq 0 ] ; then
+    rm -f conftest conftest.c
+    return 0
+  else
+    rm -f conftest conftest.c
+    return 1
+  fi
+}
+
+fparselncheck() {
+  cat << EOF > conftest.c
+#include <stdio.h>
+#if defined(__APPLE__)
+#include "portable/apple.h"
+#elif defined(__linux__)
+#include "portable/util.h"
+#else
+#include <util.h>
+int main(void){fparseln(NULL,NULL,NULL,NULL,0);return 0;}
+EOF
+  $cc $tflags -o conftest conftest.c > /dev/null 2>&1
+  if [ $? -eq 0 ] ; then
+    rm -f conftest conftest.c
+    return 0
+  else
+    rm -f conftest conftest.c
+    return 1
+  fi
+}
+
+pledgecheck() {
+  cat << EOF > conftest.c
+#include <unistd.h>
+int main(void){pledge(NULL,NULL);return 0;}
+EOF
+  $cc $tflags -o conftest conftest.c > /dev/null 2>&1
+  if [ $? -eq 0 ] ; then
+    rm -f conftest conftest.c
+    return 0
+  else
+    rm -f conftest conftest.c
+    return 1
+  fi
+}
+
+reallocarraycheck() {
+  cat << EOF > conftest.c
+#include <stdlib.h>
+int main(void){reallocarray(NULL, 0, 0);return 0;}
+EOF
+  $cc $tflags -o conftest conftest.c > /dev/null 2>&1
+  if [ $? -eq 0 ] ; then
+    rm -f conftest conftest.c
+    return 0
+  else
+    rm -f conftest conftest.c
+    return 1
+  fi
+}
+
+strlcatcheck() {
+  cat << EOF > conftest.c
+#include <string.h>
+int main(void){strlcat(NULL,NULL,0);return 0;}
+EOF
+  $cc $tflags -o conftest conftest.c > /dev/null 2>&1
+  if [ $? -eq 0 ] ; then
+    rm -f conftest conftest.c
+    return 0
+  else
+    rm -f conftest conftest.c
+    return 1
+  fi
+}
+
+strlcpycheck() {
+  cat << EOF > conftest.c
+#include <string.h>
+int main(void){strlcpy(NULL,NULL,0);return 0;}
+EOF
+  $cc $tflags -o conftest conftest.c > /dev/null 2>&1
+  if [ $? -eq 0 ] ; then
+    rm -f conftest conftest.c
+    return 0
+  else
+    rm -f conftest conftest.c
+    return 1
+  fi
+}
+
+strtonumcheck() {
+  cat << EOF > conftest.c
+#include <stdlib.h>
+int main(void){strtonum(NULL, 0, 0, NULL);return 0;}
+EOF
+  $cc $tflags -o conftest conftest.c > /dev/null 2>&1
+  if [ $? -eq 0 ] ; then
+    rm -f conftest conftest.c
+    return 0
+  else
+    rm -f conftest conftest.c
+    return 1
+  fi
+}
+
+wflagcheck() {
+  cat << EOF > conftest.c
+int main(void){return 0;}
+EOF
+  $cc -w -o conftest conftest.c > /dev/null 2> conftest.err
+  grep ':' conftest.err > /dev/null 2>&1
+  if [ $? -eq 0 ] ; then
+    rm -f conftest conftest.err conftest.c
+    return 1
+  else
+    rm -f conftest conftest.err conftest.c
+    return 0
+  fi
+}
+
+# Option variables
+if [ ! -z "$PREFIX" ] ; then
+  prefix="$PREFIX"
+else
+  prefix="/usr/local"
+fi
+
+mandir="$prefix/man"
+
+instprog="mg"
+static=0
+
+# Options
+for opt
+do
+  case "$opt" in
+    --prefix=*)
+	prefix=`echo $opt | cut -d '=' -f 2`
+	;;
+    --mandir=*)
+	mandir=`echo $opt | cut -d '=' -f 2`
+	;;
+    --disable-static|--enable-static)
+	if [ "x$opt" = "x--enable-static" ] ; then
+	  static=1
+	else
+	  static=0
+	fi
+	;;
+    --help|-h)
+	echo "Usage: configure [options]"
+	echo ""
+	echo "Options:"
+	printf "  --help or -h            "
+	echo "Display this help message"
+	printf "  --prefix=PREFIX         "
+	echo "Top level install directory is PREFIX [$prefix]"
+	printf "  --mandir=MANDIR         "
+	echo "Manual pages are installed to MANDIR [$mandir]"
+	printf "  --enable-static         "
+	echo "Statically link executables [default=no]"
+	exit 1
+	;;
+    *)
+	;;
+  esac
+done
+
+if [ ! -z "$CFLAGS" ] ; then
+  cflags="$CFLAGS -DREGEX"
+else
+  cflags="-DREGEX"
+fi
+
+if [ ! -z "$LDFLAGS" ] ; then
+  ldflags="$LDFLAGS "
+else
+  ldflags=""
+fi
+
+if [ $static -ne 0 ] ; then
+  ldflags="${ldflags}-static"
+fi
+
+printf "checking for C compiler... "
+cccheck
+if [ $? -ne 0 ] ; then
+  echo "not found"
+  echo "Please install a C compiler and re-run configure."
+  exit 1
+else
+  echo "$cc"
+fi
+
+printf "checking for -w compiler flag... "
+wflagcheck
+if [ $? -ne 0 ] ; then
+  echo "no"
+else
+  cflags="$cflags -w"
+  echo "yes"
+fi
+
+printf "checking for OS... "
+libs='-lcurses'
+os=`uname -s`
+echo "$os"
+
+case "x$os" in
+  "xLinux"|"xCYGWIN"*)
+    cflags="$cflags -D_GNU_SOURCE -D__dead=\"__attribute__((__noreturn__))\" -Dst_mtimespec=st_mtim"
+    ;;
+  "xDarwin")
+    cflags="$cflags -DMSG_NOSIGNAL=SO_NOSIGPIPE -DLOGIN_NAME_MAX=MAXLOGNAME"
+    libs="$libs -lutil"
+    ;;
+  "xFreeBSD")
+    cflags="$cflags -D__dead=__dead2 -DLOGIN_NAME_MAX=MAXLOGNAME"
+    libs="$libs -lutil"
+    ;;
+  "xOpenBSD")
+    libs="$libs -lutil"
+    ;;
+  "xNetBSD")
+    libs="$libs -lutil"
+    ;;
+  "xDragonFly")
+    cflags="$cflags -D__dead=__dead2 -DLOGIN_NAME_MAX=MAXLOGNAME"
+    libs="$libs -lutil"
+    ;;
+esac
+
+cat << EOF > config.h
+/* This file generated automatically by configure.  */
+
+#include "common.h"
+#if defined(__linux__) || defined(__CYGWIN__)
+#include "linux.h"
+#elif defined(__APPLE__)
+#include "apple.h"
+#elif defined(__FreeBSD__)
+#include "freebsd.h"
+#elif defined(__NetBSD__)
+#include "netbsd.h"
+#elif defined(__DragonFly__)
+#include "dragonfly.h"
+#endif
+
+EOF
+
+printf "checking for fgetln... "
+fgetlncheck
+if [ $? -eq 0 ] ; then
+  echo "#define HAVE_FGETLN" >> config.h
+  echo "yes"
+else
+  echo "no"
+fi
+
+printf "checking for fparseln... "
+fparselncheck
+if [ $? -eq 0 ] ; then
+  echo "#define HAVE_FPARSELN" >> config.h
+  echo "yes"
+else
+  echo "no"
+fi
+
+printf "checking for pledge... "
+pledgecheck
+if [ $? -eq 0 ] ; then
+  echo "#define HAVE_PLEDGE" >> config.h
+  echo "yes"
+else
+  echo "no"
+fi
+
+printf "checking for reallocarray... "
+reallocarraycheck
+if [ $? -eq 0 ] ; then
+  echo "#define HAVE_REALLOCARRAY" >> config.h
+  echo "yes"
+else
+  echo "no"
+fi
+
+printf "checking for strlcat... "
+strlcatcheck
+if [ $? -eq 0 ] ; then
+  echo "#define HAVE_STRLCAT" >> config.h
+  echo "yes"
+else
+  echo "no"
+fi
+
+printf "checking for strlcpy... "
+strlcpycheck
+if [ $? -eq 0 ] ; then
+  echo "#define HAVE_STRLCPY" >> config.h
+  echo "yes"
+else
+  echo "no"
+fi
+
+printf "checking for strtonum... "
+strtonumcheck
+if [ $? -eq 0 ] ; then
+  echo "#define HAVE_STRTONUM" >> config.h
+  echo "yes"
+else
+  echo "no"
+fi
+
+printf "creating Makefile... "
+cat << EOF > Makefile
+# This Makefile automatically generated by configure.
+
+CC =		$cc
+CFLAGS =	$cflags
+EOF
+
+if [ ! -z "$ldflags" ] ; then
+cat << EOF >> Makefile
+LDFLAGS =	$ldflags
+EOF
+fi
+
+cat << EOF >> Makefile
+PREFIX =	$prefix
+MANDIR =	$mandir
+PROG =		$instprog
+
+OBJS =	autoexec.o basic.o bell.o buffer.o cinfo.o dir.o display.o \\
+	echo.o extend.o file.o fileio.o funmap.o help.o kbd.o keymap.o \\
+	line.o macro.o main.o match.o modes.o paragraph.o re_search.o \\
+	region.o search.o spawn.o tty.o ttyio.o ttykbd.o undo.o util.o \\
+	version.o window.o word.o yank.o cmode.o cscope.o dired.o \\
+	grep.o tags.o fgetln.o fparseln.o futimens.o reallocarray.o \\
+	strlcat.o strlcpy.o strtonum.o extensions.o
+
+all: \${PROG}
+
+\${PROG}: \${OBJS}
+	\${CC} \${LDFLAGS} -o \${PROG} \${OBJS} $libs
+
+install:
+	install -d \${DESTDIR}\${PREFIX}/bin
+	install -d \${DESTDIR}\${MANDIR}/man1
+	install -c -s -m 755 \${PROG} \${DESTDIR}\${PREFIX}/bin
+	install -c -m 644 mg.1 \${DESTDIR}\${MANDIR}/man1/\${PROG}.1
+
+test:
+	echo "No tests"
+
+clean:
+	rm -f \${PROG} \${OBJS}
+
+distclean: clean
+	rm -f Makefile config.h
+EOF
+echo "done"

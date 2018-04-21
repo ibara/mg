@@ -13,22 +13,7 @@
 /*
  * We open with Mg portable things.
  */
-#include "portable/common/common.h"
-#if defined(__linux__) || defined(__CYGWIN__)
-#include "portable/linux/linux.h"
-#endif
-#ifdef __APPLE__
-#include "portable/apple/apple.h"
-#endif
-#ifdef __FreeBSD__
-#include "portable/freebsd/freebsd.h"
-#endif
-#ifdef __NetBSD__
-#include "portable/netbsd/netbsd.h"
-#endif
-#ifdef __DragonFly__
-#include "portable/dragonfly/dragonfly.h"
-#endif
+#include "config.h"
 
 #include	"chrdef.h"
 

@@ -35,6 +35,8 @@
 #include <errno.h>
 #include <string.h>
 
+#ifndef HAVE_FGETLN
+
 char *
 fgetln(FILE *fp, size_t *len)
 {
@@ -78,3 +80,5 @@ fgetln(FILE *fp, size_t *len)
 	*len = (ptr - buf) + 1;
 	return buf;
 }
+
+#endif /* !HAVE_FGETLN */

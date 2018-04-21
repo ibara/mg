@@ -57,7 +57,7 @@ main(int argc, char **argv)
 	int	  	 nobackups = 0, bro = 0;
 	struct buffer	*bp = NULL;
 
-#ifdef __OpenBSD__
+#ifdef HAVE_PLEDGE
 	if (pledge("stdio rpath wpath cpath fattr chown getpw tty proc exec",
 	    NULL) == -1)
 		err(1, "pledge");

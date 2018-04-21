@@ -34,10 +34,12 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifndef HAVE_FPARSELN
+
 #ifdef __APPLE__
-#include "../apple/apple.h"
+#include "apple.h"
 #else
-#include "../linux/util.h"
+#include "util.h"
 #endif
 
 char *fgetln(FILE *, size_t *);
@@ -177,6 +179,8 @@ fparseln(FILE *fp, size_t *size, size_t *lineno, const char str[3],
 		*size = len;
 	return buf;
 }
+
+#endif /* !HAVE_FPARSELN */
 
 #ifdef TEST
 

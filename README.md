@@ -15,9 +15,12 @@ This repository aggressively tracks upstream.
 
 Compiling
 ---------
-Type make or gmake, depending on your operating system.
-FreeBSD, NetBSD, and DragonFly BSD should type `gmake`.
-All other operating systems should type `make`.
+`mg` has a simple configure script that generates a `POSIX` `Makefile`.
+```
+$ ./configure
+$ make
+$ sudo make install
+```
 
 Testing
 -------
@@ -26,8 +29,8 @@ Mac OS X (10.10 or later), NetBSD, Slackware, and Ubuntu.
 
 Licensing
 ---------
-Most files in the top-level directory are Public Domain. Files under the
-portable/ directory have their own individual license headers.
+Files originating from `mg` are Public Domain. Files needed for portability
+have their own individual license headers.
 All licenses are ISC or BSD.
 
 Get a tarball
