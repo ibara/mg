@@ -16,10 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HAVE_STRLCPY
-
 #include <sys/types.h>
 #include <string.h>
+
+#include "config.h"
+
+#ifndef HAVE_STRLCPY
 
 /*
  * Copy string src to buffer dst of size dsize.  At most dsize-1

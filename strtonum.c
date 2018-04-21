@@ -17,11 +17,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HAVE_STRTONUM
-
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
+
+#include "config.h"
+
+#ifndef HAVE_STRTONUM
 
 #define	INVALID		1
 #define	TOOSMALL	2

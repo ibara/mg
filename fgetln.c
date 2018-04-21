@@ -35,6 +35,8 @@
 #include <errno.h>
 #include <string.h>
 
+#include "config.h"
+
 #ifndef HAVE_FGETLN
 
 char *

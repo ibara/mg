@@ -34,11 +34,11 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "config.h"
+
 #ifndef HAVE_FPARSELN
 
-#ifdef __APPLE__
-#include "apple.h"
-#else
+#ifndef __APPLE__
 #include "util.h"
 #endif
 

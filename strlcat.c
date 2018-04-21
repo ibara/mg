@@ -16,10 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HAVE_STRLCAT
-
 #include <sys/types.h>
 #include <string.h>
+
+#include "config.h"
+
+#ifndef HAVE_STRLCAT
 
 /*
  * Appends src to string dst of size dsize (unlike strncat, dsize is the

@@ -7,6 +7,8 @@
 #endif
 #include <sys/types.h>
 
+#include <stdio.h>
+
 /* Defines */
 #define TCSASOFT 0
 

@@ -1,8 +1,10 @@
 /* This file is in the public domain. */
 
-#ifndef HAVE_FUTIMENS
-
 #include <sys/time.h>
+
+#include "config.h"
+
+#ifndef HAVE_FUTIMENS
 
 int
 futimens(int fildes, const struct timespec times[2])

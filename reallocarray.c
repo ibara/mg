@@ -15,12 +15,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef HAVE_REALLOCARRAY
-
 #include <sys/types.h>
 #include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>
+
+#include "config.h"
+
+#ifndef HAVE_REALLOCARRAY
 
 /*
  * This is sqrt(SIZE_MAX+1), as s1*s2 <= SIZE_MAX
