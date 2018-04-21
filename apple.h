@@ -3,6 +3,8 @@
  */
 
 #include <sys/param.h>
+
+#include <stdio.h>
 #include <time.h>
 
 /*
