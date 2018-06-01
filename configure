@@ -74,9 +74,10 @@ fparselncheck() {
 #include "util.h"
 #else
 #include <util.h>
+#endif
 int main(void){fparseln(NULL,NULL,NULL,NULL,0);return 0;}
 EOF
-  $cc $tflags -o conftest conftest.c > /dev/null 2>&1
+  $cc $tflags -o conftest conftest.c $libs > /dev/null 2>&1
   if [ $? -eq 0 ] ; then
     rm -f conftest conftest.c
     return 0
@@ -260,7 +261,7 @@ else
 fi
 
 printf "checking for OS... "
-libs='-lcurses'
+libs='-lncurses'
 os=`uname -s`
 echo "$os"
 

@@ -22,6 +22,10 @@ $ make
 $ sudo make install
 ```
 
+Dependencies
+------------
+You need the ncurses library.
+
 Testing
 -------
 Tested on recent versions of Arch, Cygwin, Debian, DragonFly BSD, FreeBSD,
@@ -35,4 +39,4 @@ All licenses are ISC or BSD.
 
 Get a tarball
 -------------
-http://devio.us/~bcallah/mg/mg-20180421.tar.gz
+http://devio.us/~bcallah/mg/mg-20180601.tar.gz
