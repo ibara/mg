@@ -39,4 +39,4 @@ All licenses are ISC or BSD.
 
 Get a tarball
 -------------
-http://devio.us/~bcallah/mg/mg-20180601.tar.gz
+See the Releases tab on GitHub.
