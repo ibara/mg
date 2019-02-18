@@ -20,9 +20,3 @@
 #define st_atim st_atimespec
 #define st_mtim st_mtimespec
 #define st_ctim st_ctimespec
-
-/* Functions */
-char *fparseln(FILE *, size_t *, size_t *, const char[3], int);
-void *reallocarray(void *, size_t, size_t);
-long long	strtonum(const char *, long long, long long, const char **);
-int	futimens(int, const struct timespec[2]);

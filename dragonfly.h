@@ -7,6 +7,3 @@
 
 /* Defines */
 #define MAXNAMLEN 255
-
-/* Functions */
-void   *reallocarray(void *, size_t, size_t);
