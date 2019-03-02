@@ -1,4 +1,5 @@
 /*	$OpenBSD: strndup.c,v 1.3 2019/01/25 00:19:25 millert Exp $	*/
+/*	$OpenBSD: strnlen.c,v 1.9 2019/01/25 00:19:25 millert Exp $	*/
 
 /*
  * Copyright (c) 2010 Todd C. Miller <millert@openbsd.org>
@@ -23,6 +24,17 @@
 #include "config.h"
 
 #ifndef HAVE_STRNDUP
+
+static size_t
+strnlen(const char *str, size_t maxlen)
+{
+	const char *cp;
+
+	for (cp = str; maxlen != 0 && *cp != '\0'; cp++, maxlen--)
+		;
+
+	return (size_t)(cp - str);
+}
 
 char *
 strndup(const char *str, size_t maxlen)

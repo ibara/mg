@@ -393,7 +393,7 @@ if [ $? -eq 0 ] ; then
   echo "#define HAVE_GETLINE" >> config.h
   echo "yes"
 else
-  echo "extern ssize_t *getline(char **, size_t *, FILE *);" >> config.h
+  echo "extern ssize_t getline(char **, size_t *, FILE *);" >> config.h
   echo "no"
 fi
 
