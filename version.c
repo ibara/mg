@@ -13,7 +13,7 @@
 
 #include "def.h"
 
-const char	version[] = "Mg 2a portable 20190301";
+const char	version[] = "Mg 2a portable 20190302";
 
 /*
  * Display the version. All this does
