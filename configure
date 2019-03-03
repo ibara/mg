@@ -442,7 +442,7 @@ if [ $? -eq 0 ] ; then
   echo "#define HAVE_STRNDUP" >> config.h
   echo "yes"
 else
-  echo "extern size_t strndup(const char *, size_t);" >> config.h
+  echo "extern char *strndup(const char *, size_t);" >> config.h
   echo "no"
 fi
 
