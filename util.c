@@ -1,4 +1,4 @@
-/*	$OpenBSD: util.c,v 1.40 2018/12/26 07:01:22 phessler Exp $	*/
+/*	$OpenBSD: util.c,v 1.42 2019/06/22 15:38:15 lum Exp $	*/
 
 /* This file is in the public domain. */
 
@@ -20,15 +20,19 @@
  * Display a bunch of useful information about the current location of dot.
  * The character under the cursor (in octal), the current line, row, and
  * column, and approximate position of the cursor in the file (as a
- * percentage) is displayed.  The column position assumes an infinite
+ * percentage) is displayed.
+ * Also included at the moment are some values in parenthesis for debugging
+ * explicit newline inclusion into the buffer.
+ * The column position assumes an infinite
  * position display; it does not truncate just because the screen does.
- * This is normally bound to "C-X =".
+ * This is normally bound to "C-x =".
  */
 /* ARGSUSED */
 int
 showcpos(int f, int n)
 {
 	struct line	*clp;
+	char		*msg;
 	long	 nchar, cchar;
 	int	 nline, row;
 	int	 cline, cbyte;		/* Current line/char/byte */
@@ -36,32 +40,41 @@ showcpos(int f, int n)
 
 	/* collect the data */
 	clp = bfirstlp(curbp);
+	msg = "Char:";
 	cchar = 0;
 	cline = 0;
 	cbyte = 0;
 	nchar = 0;
 	nline = 0;
 	for (;;) {
-		/* count this line */
+		/* count lines and display total as (raw) 'lines' and
+		   compare with b_lines */
 		++nline;
 		if (clp == curwp->w_dotp) {
-			/* mark line */
+			/* obtain (raw) dot line # and compare with w_dotline */
 			cline = nline;
 			cchar = nchar + curwp->w_doto;
 			if (curwp->w_doto == llength(clp))
+				/* fake a \n at end of line */
 				cbyte = '\n';
 			else
 				cbyte = lgetc(clp, curwp->w_doto);
 		}
-		/* now count the chars */
+		/* include # of chars in this line for point-thru-buff ratio */
 		nchar += llength(clp);
 		clp = lforw(clp);
-		if (clp == curbp->b_headp)
+		if (clp == curbp->b_headp) {
+			if (cbyte == '\n' && cline == curbp->b_lines) {
+				/* swap faked \n for EOB msg */
+				cbyte = EOF;
+				msg = "(EOB)";
+			}
 			break;
-		/* count the newline */
+		}
+		/* count the implied newline */
 		nchar++;
 	}
-	/* determine row */
+	/* determine row # within current window */
 	row = curwp->w_toprow + 1;
 	clp = curwp->w_linep;
 	while (clp != curbp->b_headp && clp != curwp->w_dotp) {
@@ -69,8 +82,10 @@ showcpos(int f, int n)
 		clp = lforw(clp);
 	}
 	ratio = nchar ? (100L * cchar) / nchar : 100;
-	ewprintf("Char: %c (0%o)  point=%ld(%d%%)  line=%d  row=%d  col=%d",
-	    cbyte, cbyte, cchar, ratio, cline, row, getcolpos(curwp));
+	ewprintf("%s %c (0%o)  point=%ld(%d%%)  line=%d  row=%d  col=%d" \
+            "  (blines=%d rlines=%d l_size=%d)", msg,
+	    cbyte, cbyte, cchar, ratio, cline, row, getcolpos(curwp),
+	    curbp->b_lines, nline, clp->l_size);
 	return (TRUE);
 }
 
@@ -162,7 +177,7 @@ twiddle(int f, int n)
  * Open up some blank space.  The basic plan is to insert a bunch of
  * newlines, and then back up over them.  Everything is done by the
  * subcommand processors.  They even handle the looping.  Normally this
- * is bound to "C-O".
+ * is bound to "C-o".
  */
 /* ARGSUSED */
 int
@@ -213,7 +228,7 @@ enewline(int f, int n)
  * sitting on a blank line. If dot is sitting on a blank line, this command
  * deletes all the blank lines above and below the current line. If it is
  * sitting on a non blank line then it deletes all of the blank lines after
- * the line. Normally this command is bound to "C-X C-O". Any argument is
+ * the line. Normally this command is bound to "C-x C-o". Any argument is
  * ignored.
  */
 /* ARGSUSED */
@@ -334,7 +349,7 @@ deltrailwhite(int f, int n)
  * simple.  Figure out the indentation of the current line.  Insert a newline
  * by calling the standard routine.  Insert the indentation by inserting the
  * right number of tabs and spaces.  Return TRUE if all ok.  Return FALSE if
- * one of the subcommands failed. Normally bound to "C-M".
+ * one of the subcommands failed. Normally bound to "C-m".
  */
 /* ARGSUSED */
 int
@@ -411,7 +426,7 @@ indent(int f, int n)
  * Delete forward.  This is real easy, because the basic delete routine does
  * all of the work.  Watches for negative arguments, and does the right thing.
  * If any argument is present, it kills rather than deletes, to prevent loss
- * of text if typed with a big argument.  Normally bound to "C-D".
+ * of text if typed with a big argument.  Normally bound to "C-d".
  */
 /* ARGSUSED */
 int

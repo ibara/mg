@@ -237,7 +237,8 @@ fi
 
 mandir="$prefix/man"
 
-instprog="mg"
+prog="mg"
+log=0
 static=0
 
 # Options
@@ -249,6 +250,13 @@ do
 	;;
     --mandir=*)
 	mandir=`echo $opt | cut -d '=' -f 2`
+	;;
+    --disable-logging|--enable-logging)
+	if [ "x$opt" = "x--enable-logging" ] ; then
+	  log=1
+	else
+	  log=0
+	fi
 	;;
     --disable-static|--enable-static)
 	if [ "x$opt" = "x--enable-static" ] ; then
@@ -267,6 +275,8 @@ do
 	echo "Top level install directory is PREFIX [$prefix]"
 	printf "  --mandir=MANDIR         "
 	echo "Manual pages are installed to MANDIR [$mandir]"
+	printf "  --enable-logging        "
+	echo "Enable run-time debugging [default=no]"
 	printf "  --enable-static         "
 	echo "Statically link executables [default=no]"
 	exit 1
@@ -476,7 +486,7 @@ fi
 cat << EOF >> Makefile
 PREFIX =	$prefix
 MANDIR =	$mandir
-PROG =		$instprog
+PROG =		$prog
 
 OBJS =	autoexec.o basic.o bell.o buffer.o cinfo.o dir.o display.o \\
 	echo.o extend.o file.o fileio.o funmap.o help.o kbd.o keymap.o \\
@@ -485,8 +495,16 @@ OBJS =	autoexec.o basic.o bell.o buffer.o cinfo.o dir.o display.o \\
 	version.o window.o word.o yank.o cmode.o cscope.o dired.o \\
 	grep.o tags.o fparseln.o fstatat.o futimens.o getline.o \\
 	reallocarray.o strlcat.o strlcpy.o strndup.o strtonum.o \\
-	extensions.o
+	interpreter.o extensions.o
+EOF
 
+if [ $log -ne 0 ] ; then
+cat << EOF >> Makefile
+OBJS +=	log.o
+EOF
+fi
+
+cat << EOF >> Makefile
 all: \${PROG}
 
 \${PROG}: \${OBJS}

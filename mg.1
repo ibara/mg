@@ -1,7 +1,7 @@
-.\"	$OpenBSD: mg.1,v 1.112 2018/12/26 07:01:22 phessler Exp $
+.\"	$OpenBSD: mg.1,v 1.117 2019/07/02 16:25:39 lum Exp $
 .\" This file is in the public domain.
 .\"
-.Dd $Mdocdate: December 26 2018 $
+.Dd $Mdocdate: July 2 2019 $
 .Dt MG 1
 .Os
 .Sh NAME
@@ -405,6 +405,10 @@ Paragraphs are delimited by <NL><NL> or <NL><TAB> or <NL><SPACE>.
 Move cursor backwards by the specified number of words.
 .It beginning-of-buffer
 Move cursor to the top of the buffer.
+If set, keep mark's position, otherwise set at current position.
+A numeric argument
+.Va n
+will move n/10th of the way from the top.
 .It beginning-of-line
 Move cursor to the beginning of the line.
 .It blink-and-insert
@@ -413,6 +417,7 @@ matching delimiter.
 For delimiters other than
 parenthesis, brackets, and braces, the character itself
 is used as its own match.
+Can be used in the startup file with the global-set-key command.
 .It bsmap-mode
 Toggle bsmap mode, where DEL and C-h are swapped.
 .It c-mode
@@ -526,6 +531,10 @@ version string.
 Stop defining a keyboard macro.
 .It end-of-buffer
 Move cursor to the end of the buffer.
+If set, keep mark's position, otherwise set at current position.
+A numeric argument
+.Va n
+will move n/10th of the way from the end.
 .It end-of-line
 Move cursor to the end of the line.
 .It enlarge-window
@@ -975,6 +984,8 @@ dired-do-copy
 dired-flag-file-deletion
 .It g
 dired-revert
+.It j
+dired-goto-file
 .It o
 dired-find-file-other-window
 .It p
@@ -1017,6 +1028,8 @@ is executed.
 .It dired-find-file-other-window
 Open the file on the current line of the dired buffer in a
 different window.
+.It dired-goto-file
+Move the cursor to a file name in the dired buffer.
 .It dired-next-line
 Move the cursor to the next line.
 .It dired-other-window

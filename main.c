@@ -1,4 +1,4 @@
-/*	$OpenBSD: main.c,v 1.85 2018/12/13 14:59:16 lum Exp $	*/
+/*	$OpenBSD: main.c,v 1.87 2019/06/22 15:38:15 lum Exp $	*/
 
 /* This file is in the public domain. */
 
@@ -20,6 +20,10 @@
 #include "kbd.h"
 #include "funmap.h"
 #include "macro.h"
+
+#ifdef  MGLOG
+#include "log.h"
+#endif
 
 int		 thisflag;			/* flags, this command	*/
 int		 lastflag;			/* flags, last command	*/
@@ -88,6 +92,11 @@ main(int argc, char **argv)
 
 	maps_init();		/* Keymaps and modes.		*/
 	funmap_init();		/* Functions.			*/
+
+#ifdef  MGLOG
+	if (!mgloginit())
+		errx(1, "Unable to create logging environment.");
+#endif
 
 	/*
 	 * This is where we initialize standalone extensions that should
@@ -242,7 +251,7 @@ edinit(struct buffer *bp)
 
 /*
  * Quit command.  If an argument, always quit.  Otherwise confirm if a buffer
- * has been changed and not written out.  Normally bound to "C-X C-C".
+ * has been changed and not written out.  Normally bound to "C-x C-c".
  */
 /* ARGSUSED */
 int

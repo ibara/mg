@@ -29,7 +29,7 @@ You need the ncurses library.
 Testing
 -------
 Tested on recent versions of Arch, Cygwin, Debian, DragonFly BSD, FreeBSD,
-Mac OS X (10.10 or later), NetBSD, Slackware, and Ubuntu.
+Mac OS X (10.4 or later), NetBSD, Slackware, and Ubuntu.
 
 Licensing
 ---------
@@ -37,6 +37,12 @@ Files originating from `mg` are Public Domain. Files needed for portability
 have their own individual license headers.
 All licenses are ISC or BSD.
 
+Commonly asked questions
+------------------------
+`mg` does not yet support UTF-8. If you would like to work on this, please
+reach out to the tech@ mailing list on OpenBSD.
+
 Get a tarball
 -------------
 See the Releases tab on GitHub.
+The latest version is mg-6.5.
