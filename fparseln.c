@@ -75,7 +75,7 @@
 #endif
 
 static char *
-fgetln(FILE *fp, size_t *len)
+efgetln(FILE *fp, size_t *len)
 {
 	static char *buf = NULL;
 	static size_t bufsiz = 0;
@@ -177,7 +177,7 @@ fparseln(FILE *fp, size_t *size, size_t *lineno, const char str[3],
 		if (lineno)
 			(*lineno)++;
 
-		if ((ptr = fgetln(fp, &s)) == NULL)
+		if ((ptr = efgetln(fp, &s)) == NULL)
 			break;
 
 		if (s && com) {		/* Check and eliminate comments */
