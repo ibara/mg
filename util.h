@@ -80,7 +80,6 @@ struct termios;
 struct utmp;
 struct winsize;
 
-__BEGIN_DECLS
 char   *fparseln(FILE *, size_t *, size_t *, const char[3], int);
 void	login(struct utmp *);
 int	login_tty(int);
@@ -118,7 +117,5 @@ int	pkcs5_pbkdf2(const char *, size_t, const uint8_t *, size_t,
     uint8_t *, size_t, unsigned int);
 int	bcrypt_pbkdf(const char *, size_t, const uint8_t *, size_t,
     uint8_t *, size_t, unsigned int);
-
-__END_DECLS
 
 #endif /* !_UTIL_H_ */
