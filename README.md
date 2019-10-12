@@ -28,8 +28,8 @@ You need the ncurses library.
 
 Testing
 -------
-Tested on recent versions of Arch, Cygwin, Debian, DragonFly BSD, FreeBSD,
-Mac OS X (10.4 or later), NetBSD, Slackware, and Ubuntu.
+Tested on recent versions of Arch, Alpine, Cygwin, Debian, DragonFly BSD,
+FreeBSD, Mac OS X (10.4 or later), NetBSD, Slackware, and Ubuntu.
 
 Licensing
 ---------
