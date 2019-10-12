@@ -2,21 +2,26 @@
  * Support for non-OpenBSD systems.
  */
 
-#ifndef SLIST_FOREACH_SAFE
+/* From OpenBSD sys/stat.h; glibc io/sys/stat.h agrees */
+#ifndef DEFFILEMODE
+#define DEFFILEMODE 0000666
+#endif
+
 /* From OpenBSD sys/queue.h */
+#ifndef SLIST_FOREACH_SAFE
 #define SLIST_FOREACH_SAFE(var, head, field, tvar)	\
     for ((var) = SLIST_FIRST(head);			\
 	(var) && ((tvar) = SLIST_NEXT(var, field), 1);	\
 	(var) = (tvar))
 #endif
 
-#ifndef TAILQ_END
 /* From OpenBSD sys/queue.h */
+#ifndef TAILQ_END
 #define TAILQ_END(head) NULL
 #endif
 
-#ifndef TAILQ_FOREACH_SAFE
 /* From OpenBSD sys/queue.h */
+#ifndef TAILQ_FOREACH_SAFE
 #define TAILQ_FOREACH_SAFE(var, head, field, tvar)		\
   for ((var) = TAILQ_FIRST(head);				\
        (var) != TAILQ_END(head) &&				\
