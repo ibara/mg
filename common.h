@@ -7,6 +7,11 @@
 #define DEFFILEMODE 0000666
 #endif
 
+/* From OpenBSD regex.h */
+#ifndef REG_STARTEND
+#define REG_STARTEND 00004
+#endif
+
 /* From OpenBSD sys/queue.h */
 #ifndef SLIST_FOREACH_SAFE
 #define SLIST_FOREACH_SAFE(var, head, field, tvar)	\
