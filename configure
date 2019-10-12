@@ -322,7 +322,7 @@ else
 fi
 
 printf "checking for OS... "
-libs='-lncurses'
+libs='-lncursesw'
 os=`uname -s`
 echo "$os"
 
