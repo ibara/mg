@@ -332,7 +332,7 @@ case "x$os" in
     ;;
   "xDarwin")
     cflags="$cflags -DMSG_NOSIGNAL=SO_NOSIGPIPE -DLOGIN_NAME_MAX=MAXLOGNAME"
-    libs="$libs -lutil"
+    libs="-lncurses -lutil"
     ;;
   "xFreeBSD")
     cflags="$cflags -D__dead=__dead2 -DLOGIN_NAME_MAX=MAXLOGNAME"
