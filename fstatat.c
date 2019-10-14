@@ -6,6 +6,8 @@
 
 #include <sys/stat.h>
 
+#include <stdio.h>
+
 #include "config.h"
 
 #ifndef HAVE_FSTATAT
