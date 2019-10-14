@@ -96,6 +96,7 @@ futimenscheck() {
   cat << EOF > conftest.c
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <stdio.h>
 int main(void){futimens(0, NULL);return 0;}
 EOF
   $cc $tflags -o conftest conftest.c > /dev/null 2>&1
