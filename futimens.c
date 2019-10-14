@@ -2,6 +2,8 @@
 
 #include <sys/time.h>
 
+#include <stdio.h>
+
 #include "config.h"
 
 #ifndef HAVE_FUTIMENS
