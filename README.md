@@ -26,6 +26,8 @@ Dependencies
 ------------
 You need the ncurses library.
 
+NetBSD users will use the in-base NetBSD curses library.
+
 Testing
 -------
 Tested on recent versions of Arch, Alpine, Cygwin, Debian, DragonFly BSD,

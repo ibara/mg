@@ -344,7 +344,7 @@ case "x$os" in
     ;;
   "xNetBSD")
     cflags="$cflags -D_OPENBSD_SOURCE"
-    libs="$libs -lutil"
+    libs="-lcurses -lutil"
     ;;
   "xDragonFly")
     cflags="$cflags -D__dead=__dead2 -DLOGIN_NAME_MAX=MAXLOGNAME"
