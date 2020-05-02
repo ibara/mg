@@ -3,8 +3,7 @@
 mg
 ==
 This is a portable version of the Mg editor from OpenBSD by an OpenBSD
-developer who did a bunch of overhaul work on the version of Mg found in
-the OpenBSD base system.
+developer.
 
 Mg is intended to be a small, fast, and portable editor for people who
 can't (or don't want to) run emacs for one reason or another, or are not
@@ -47,4 +46,4 @@ reach out to the tech@ mailing list on OpenBSD.
 Get a tarball
 -------------
 See the Releases tab on GitHub.
-The latest version is mg-6.6.
+The latest version is mg-6.7.
