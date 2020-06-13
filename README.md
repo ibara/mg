@@ -23,9 +23,14 @@ $ sudo make install
 
 Dependencies
 ------------
-You need the ncurses library.
+By default, you need the ncurses library.
 
 NetBSD users will use the in-base NetBSD curses library.
+
+If you do not have the ncurses library, you can call `configure` with the
+`--with-builtin-curses` flag to compile with a simplified version of the
+NetBSD curses library. In this setup, there are no dependencies other than
+the system's libc.
 
 Testing
 -------
