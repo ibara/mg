@@ -242,6 +242,7 @@ mandir="$prefix/man"
 prog="mg"
 log=0
 static=0
+terminfo=0
 
 # Options
 for opt
@@ -267,6 +268,13 @@ do
 	  static=0
 	fi
 	;;
+    --with-builtin-curses|--without-builtin-curses)
+	if [ "x$opt" = "x--with-builtin-curses" ] ; then
+	  terminfo=1
+	else
+	  terminfo=0
+	fi
+	;;
     --help|-h)
 	echo "Usage: configure [options]"
 	echo ""
@@ -281,6 +289,8 @@ do
 	echo "Enable run-time debugging [default=no]"
 	printf "  --enable-static         "
 	echo "Statically link executables [default=no]"
+	printf "  --with-builtin-curses   "
+	echo "Compile with builtin curses library [default=no]"
 	exit 1
 	;;
     *)
@@ -324,7 +334,13 @@ else
 fi
 
 printf "checking for OS... "
-libs='-lncursesw'
+
+if [ $terminfo -eq 0 ] ; then
+  libs="-lncursesw"
+else
+  libs=""
+fi
+
 os=`uname -s`
 echo "$os"
 
@@ -334,7 +350,11 @@ case "x$os" in
     ;;
   "xDarwin")
     cflags="$cflags -DMSG_NOSIGNAL=SO_NOSIGPIPE -DLOGIN_NAME_MAX=MAXLOGNAME"
-    libs="-lncurses -lutil"
+    if [ $terminfo -eq 0 ] ; then
+      libs="-lncurses -lutil"
+    else
+      libs="-lutil"
+    fi
     ;;
   "xFreeBSD")
     cflags="$cflags -D__dead=__dead2 -DLOGIN_NAME_MAX=MAXLOGNAME"
@@ -345,7 +365,11 @@ case "x$os" in
     ;;
   "xNetBSD")
     cflags="$cflags -D_OPENBSD_SOURCE"
-    libs="-lcurses -lutil"
+    if [ $terminfo -eq 0 ] ; then
+      libs="-lcurses -lutil"
+    else
+      libs="-lutil"
+    fi
     ;;
   "xDragonFly")
     cflags="$cflags -D__dead=__dead2 -DLOGIN_NAME_MAX=MAXLOGNAME"
@@ -488,8 +512,8 @@ fi
 cat << EOF >> Makefile
 PREFIX =	$prefix
 MANDIR =	$mandir
-PROG =		$prog
 
+PROG =	$prog
 OBJS =	autoexec.o basic.o bell.o buffer.o cinfo.o dir.o display.o \\
 	echo.o extend.o file.o fileio.o funmap.o help.o kbd.o keymap.o \\
 	line.o macro.o main.o match.o modes.o paragraph.o re_search.o \\
@@ -498,11 +522,26 @@ OBJS =	autoexec.o basic.o bell.o buffer.o cinfo.o dir.o display.o \\
 	grep.o tags.o fparseln.o fstatat.o futimens.o getline.o \\
 	reallocarray.o strlcat.o strlcpy.o strndup.o strtonum.o \\
 	interpreter.o extensions.o
+
 EOF
+
+if [ $terminfo -ne 0 ] ; then
+cat << EOF >> Makefile
+OBJS +=	term.o ti.o setupterm.o curterm.o tparm.o tputs.o \\
+	compile.o hash.o termcap.o mi_vector_hash.o cdbr.o
+
+EOF
+sed -i 's,<term.h>,"terminfo_term.h",g' display.c echo.c spawn.c tty.c \
+	ttyio.c ttykbd.c
+else
+sed -i 's,"terminfo_term.h",<term.h>,g' display.c echo.c spawn.c tty.c \
+	ttyio.c ttykbd.c
+fi
 
 if [ $log -ne 0 ] ; then
 cat << EOF >> Makefile
 OBJS +=	log.o
+
 EOF
 fi
 
