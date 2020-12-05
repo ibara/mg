@@ -51,4 +51,4 @@ reach out to the tech@ mailing list on OpenBSD.
 Get a tarball
 -------------
 See the Releases tab on GitHub.
-The latest version is mg-6.7.
+The latest version is mg-6.8.1.
