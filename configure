@@ -555,10 +555,10 @@ OBJS +=	term.o ti.o setupterm.o curterm.o tparm.o tputs.o \\
 	compile.o hash.o termcap.o mi_vector_hash.o cdbr.o
 
 EOF
-sed -i 's,<term.h>,"terminfo_term.h",g' display.c echo.c spawn.c tty.c \
+sed -i.bak 's,<term.h>,"terminfo_term.h",g' display.c echo.c spawn.c tty.c \
 	ttyio.c ttykbd.c
 else
-sed -i 's,"terminfo_term.h",<term.h>,g' display.c echo.c spawn.c tty.c \
+sed -i.bak 's,"terminfo_term.h",<term.h>,g' display.c echo.c spawn.c tty.c \
 	ttyio.c ttykbd.c
 fi
 
@@ -588,6 +588,6 @@ clean:
 	rm -f \${PROG} \${OBJS}
 
 distclean: clean
-	rm -f Makefile config.h
+	rm -f Makefile config.h *.bak
 EOF
 echo "done"
