@@ -1,9 +1,6 @@
-[![Build Status](https://travis-ci.org/ibara/mg.svg?branch=master)](https://travis-ci.org/ibara/mg)
-
 mg
 ==
-This is a portable version of the Mg editor from OpenBSD by an OpenBSD
-developer.
+This is a portable version of the Mg editor from OpenBSD.
 
 Mg is intended to be a small, fast, and portable editor for people who
 can't (or don't want to) run emacs for one reason or another, or are not
