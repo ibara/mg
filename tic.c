@@ -44,7 +44,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#if defined(__linux__) || defined(__CYGWIN__)
+#include "util.h"
+#elif defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
 #include <util.h>
+#else
+#include <libutil.h>
+#endif
 
 #include "cdbw.h"
 #include "term_private.h"
