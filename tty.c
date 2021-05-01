@@ -1,4 +1,4 @@
-/*	$OpenBSD: tty.c,v 1.37 2020/02/09 10:13:13 florian Exp $	*/
+/*	$OpenBSD: tty.c,v 1.39 2021/03/20 09:00:49 lum Exp $	*/
 
 /* This file is in the public domain. */
 
@@ -34,6 +34,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <term.h>
+#include <unistd.h>
 
 #include "def.h"
 
@@ -41,7 +42,7 @@ static int	 charcost(const char *);
 
 static int	 cci;
 static int	 insdel;	/* Do we have both insert & delete line? */
-static const char	*scroll_fwd;	/* How to scroll forward. */
+static char	*scroll_fwd;	/* How to scroll forward. */
 
 static void	 winchhandler(int);
 
@@ -64,9 +65,15 @@ winchhandler(int sig)
 void
 ttinit(void)
 {
+	char *tty;
 	int errret;
 
-	if (setupterm(NULL, 1, &errret))
+	if (batch == 1)
+		tty = "pty";
+	else
+		tty = NULL;
+
+	if (setupterm(tty, STDOUT_FILENO, &errret))
 		panic("Terminal setup failed");
 
 	signal(SIGWINCH, winchhandler);
@@ -78,7 +85,7 @@ ttinit(void)
 		/* this is what GNU Emacs does */
 		scroll_fwd = parm_down_cursor;
 		if (scroll_fwd == NULL || *scroll_fwd == '\0')
-			scroll_fwd = "\n";
+			scroll_fwd = curbp->b_nlchr;
 	}
 
 	if (cursor_address == NULL || cursor_up == NULL)

@@ -1,4 +1,4 @@
-/*	$OpenBSD: def.h,v 1.167 2021/02/23 08:10:51 lum Exp $	*/
+/*	$OpenBSD: def.h,v 1.173 2021/04/22 19:50:55 lum Exp $	*/
 
 /* This file is in the public domain. */
 
@@ -272,6 +272,8 @@ struct buffer {
 	char		 b_flag;	/* Flags			 */
 	char		 b_fname[NFILEN]; /* File name			 */
 	char		 b_cwd[NFILEN]; /* working directory		 */
+	char		*b_nlseq;	/* Newline sequence of chars	 */
+	char		*b_nlchr;	/* 1st newline character	 */
 	struct fileinfo	 b_fi;		/* File attributes		 */
 	struct undoq	 b_undo;	/* Undo actions list		 */
 	struct undo_rec *b_undoptr;
@@ -366,6 +368,7 @@ int		 ask_makedir(void);
 
 /* dired.c */
 struct buffer	*dired_(char *);
+int		 dired_jump(int, int);
 int 		 do_dired(char *);
 
 /* file.c X */
@@ -585,7 +588,7 @@ int		 evalexpr(int, int);
 int		 evalbuffer(int, int);
 int		 evalfile(int, int);
 int		 load(const char *);
-int		 excline(char *);
+int		 excline(char *, int);
 char		*skipwhite(char *);
 
 /* help.c X */
@@ -675,6 +678,7 @@ int		 re_forwsearch(int, int);
 int		 re_backsearch(int, int);
 int		 re_searchagain(int, int);
 int		 re_queryrepl(int, int);
+int		 re_repl(int, int);
 int		 replstr(int, int);
 int		 setcasefold(int, int);
 int		 delmatchlines(int, int);
@@ -723,8 +727,8 @@ int		 dobeep_msg(const char *);
 void		 dobeep(void);
 
 /* interpreter.c */
-int		 foundparen(char *);
-int		 clearvars(void);
+int		 foundparen(char *, int);
+void		 cleanup(void);
 
 /*
  * Externals.
@@ -753,6 +757,7 @@ extern int		 doaudiblebell;
 extern int		 dovisiblebell;
 extern int		 dblspace;
 extern int		 allbro;
+extern int		 batch;
 extern char	 	 cinfo[];
 extern char		*keystrings[];
 extern char		 pat[NPAT];

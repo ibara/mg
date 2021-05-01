@@ -1,4 +1,4 @@
-/*	$OpenBSD: cscope.c,v 1.18 2019/07/03 03:24:02 deraadt Exp $	*/
+/*	$OpenBSD: cscope.c,v 1.20 2021/03/01 10:51:14 lum Exp $	*/
 
 /*
  * This file is in the public domain.
@@ -184,31 +184,20 @@ cscreatelist(int f, int n)
 	else if (bufp[0] == '\0')
 		return (FALSE);
 
-	if (stat(dir, &sb) == -1) {
-		dobeep();
-		ewprintf("stat: %s", strerror(errno));
-		return (FALSE);
-	} else if (S_ISDIR(sb.st_mode) == 0) {
-		dobeep();
-		ewprintf("%s: Not a directory", dir);
-		return (FALSE);
-	}
+	if (stat(dir, &sb) == -1)
+		return(dobeep_msgs("stat: %s", strerror(errno)));
+	else if (S_ISDIR(sb.st_mode) == 0)
+		return(dobeep_msgs("%s: Not a directory", dir));
 
-	if (csexists("cscope-indexer") == FALSE) {
-		dobeep();
-		ewprintf("no such file or directory, cscope-indexer");
-		return (FALSE);
-	}
+	if (csexists("cscope-indexer") == FALSE)
+		return(dobeep_msg("no such file or directory, cscope-indexer"));
 
 	clen = snprintf(cmd, sizeof(cmd), "cscope-indexer -v %s", dir);
 	if (clen < 0 || clen >= sizeof(cmd))
 		return (FALSE);
 
-	if ((fpipe = popen(cmd, "r")) == NULL) {
-		dobeep();
-		ewprintf("problem opening pipe");
-		return (FALSE);
-	}
+	if ((fpipe = popen(cmd, "r")) == NULL)
+		return(dobeep_msg("problem opening pipe"));
 
 	bp = bfind("*cscope*", TRUE);
 	if (bclear(bp) != TRUE) {
@@ -226,7 +215,7 @@ cscreatelist(int f, int n)
 	addline(bp, title);
 	addline(bp, "");
 	while ((len = getline(&line, &sz, fpipe)) != -1) {
-		if (line[len - 1] == '\n')
+		if (line[len - 1] == *bp->b_nlchr)
 			line[len - 1] = '\0';
 		addline(bp, line);
 	}
@@ -248,11 +237,10 @@ csnextmatch(int f, int n)
 	struct csmatch *m;
 
 	if (curmatch == NULL) {
-		if ((r = TAILQ_FIRST(&csrecords)) == NULL) {
-			dobeep();
-			ewprintf("The *cscope* buffer does not exist yet");
-			return (FALSE);
-		}
+		if ((r = TAILQ_FIRST(&csrecords)) == NULL)
+			return(dobeep_msg("The *cscope* buffer does "
+			    "not exist yet"));
+
 		currecord = r;
 		curmatch = TAILQ_FIRST(&r->matches);
 	} else {
@@ -260,10 +248,8 @@ csnextmatch(int f, int n)
 		if (m == NULL) {
 			r = TAILQ_NEXT(currecord, entry);
 			if (r == NULL) {
-				dobeep();
-				ewprintf("The end of *cscope* buffer has been"
-				    " reached");
-				return (FALSE);
+				return(dobeep_msg("The end of *cscope* buffer "
+				    "has been reached"));
 			} else {
 				currecord = r;
 				curmatch = TAILQ_FIRST(&currecord->matches);
@@ -293,10 +279,8 @@ csprevmatch(int f, int n)
 		else {
 			r = TAILQ_PREV(currecord, csrecords, entry);
 			if (r == NULL) {
-				dobeep();
-				ewprintf("The beginning of *cscope* buffer has"
-				    " been reached");
-				return (FALSE);
+				return(dobeep_msg("The beginning of *cscope* "
+				    "buffer has been reached"));
 			} else {
 				currecord = r;
 				curmatch = TAILQ_LAST(&currecord->matches,
@@ -316,18 +300,13 @@ csnextfile(int f, int n)
 	struct csrecord *r;
 
 	if (curmatch == NULL) {
-		if ((r = TAILQ_FIRST(&csrecords)) == NULL) {
-			dobeep();
-			ewprintf("The *cscope* buffer does not exist yet");
-			return (FALSE);
-		}
-
+		if ((r = TAILQ_FIRST(&csrecords)) == NULL)
+			return(dobeep_msg("The *cscope* buffer does not "
+			    "exist yet"));
 	} else {
-		if ((r = TAILQ_NEXT(currecord, entry)) == NULL) {
-			dobeep();
-			ewprintf("The end of *cscope* buffer has been reached");
-			return (FALSE);
-		}
+		if ((r = TAILQ_NEXT(currecord, entry)) == NULL)
+			return(dobeep_msg("The end of *cscope* buffer has "
+			    "been reached"));
 	}
 	currecord = r;
 	curmatch = TAILQ_FIRST(&currecord->matches);
@@ -343,19 +322,13 @@ csprevfile(int f, int n)
 	struct csrecord *r;
 
 	if (curmatch == NULL) {
-		if ((r = TAILQ_FIRST(&csrecords)) == NULL) {
-			dobeep();
-			ewprintf("The *cscope* buffer does not exist yet");
-			return (FALSE);
-		}
-
+		if ((r = TAILQ_FIRST(&csrecords)) == NULL)
+			return(dobeep_msg("The *cscope* buffer does not"
+			    "exist yet"));
 	} else {
-		if ((r = TAILQ_PREV(currecord, csrecords, entry)) == NULL) {
-			dobeep();
-			ewprintf("The beginning of *cscope* buffer has been"
-			    " reached");
-			return (FALSE);
-		}
+		if ((r = TAILQ_PREV(currecord, csrecords, entry)) == NULL)
+			return(dobeep_msg("The beginning of *cscope* buffer "
+			    "has been reached"));
 	}
 	currecord = r;
 	curmatch = TAILQ_FIRST(&currecord->matches);
@@ -411,11 +384,8 @@ do_cscope(int i)
 	sz = 0;
 
 	/* If current buffer isn't a source file just return */
-	if (fnmatch("*.[chy]", curbp->b_fname, 0) != 0) {
-		dobeep();
-		ewprintf("C-c s not defined");
-		return (FALSE);
-	}
+	if (fnmatch("*.[chy]", curbp->b_fname, 0) != 0)
+		return(dobeep_msg("C-c s not defined"));
 
 	if (curtoken(0, 1, pattern) == FALSE)
 		return (FALSE);
@@ -425,11 +395,8 @@ do_cscope(int i)
 	else if (p[0] == '\0')
 		return (FALSE);
 
-	if (csexists("cscope") == FALSE) {
-		dobeep();
-		ewprintf("no such file or directory, cscope");
-		return (FALSE);
-	}
+	if (csexists("cscope") == FALSE)
+		return(dobeep_msg("no such file or directory, cscope"));
 
 	csflush();
 	clen = snprintf(cmd, sizeof(cmd), "cscope -L -%d %s 2>/dev/null",
@@ -437,11 +404,8 @@ do_cscope(int i)
 	if (clen < 0 || clen >= sizeof(cmd))
 		return (FALSE);
 
-	if ((fpipe = popen(cmd, "r")) == NULL) {
-		dobeep();
-		ewprintf("problem opening pipe");
-		return (FALSE);
-	}
+	if ((fpipe = popen(cmd, "r")) == NULL)
+		return(dobeep_msg("problem opening pipe"));
 
 	bp = bfind("*cscope*", TRUE);
 	if (bclear(bp) != TRUE) {
@@ -459,7 +423,7 @@ do_cscope(int i)
 	addline(bp, "");
 	addline(bp, "-------------------------------------------------------------------------------");
 	while ((len = getline(&buf, &sz, fpipe)) != -1) {
-		if (buf[len - 1] == '\n')
+		if (buf[len - 1] == *bp->b_nlchr)
 			buf[len - 1] = '\0';
 		if (addentry(bp, buf) != TRUE) {
 			free(buf);
@@ -620,11 +584,9 @@ csexists(const char *cmd)
 	}
 	if ((tmp = getenv("PATH")) == NULL)
 		return (FALSE);
-	if ((pathc = path = strndup(tmp, NFILEN)) == NULL) {
-		dobeep();
-		ewprintf("out of memory");
-		return (FALSE);
-	}
+	if ((pathc = path = strndup(tmp, NFILEN)) == NULL)
+		return(dobeep_msg("out of memory"));
+
 	while ((dir = strsep(&path, ":")) != NULL) {
 		if (*dir == '\0')
 			continue;
@@ -635,8 +597,7 @@ csexists(const char *cmd)
 
 		len = snprintf(fname, sizeof(fname), "%s/%s", dir, cmd);
 		if (len < 0 || len >= sizeof(fname)) {
-			dobeep();
-			ewprintf("path too long");
+			(void)dobeep_msg("path too long");
 			goto cleanup;
 		}
 		if(access(fname, F_OK) == 0) {

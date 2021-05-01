@@ -1,54 +1,54 @@
 /version.c/1.10/Thu Mar 19 21:22:15 2015//
 /word.c/1.19/Sun Jan  3 04:14:49 2016//
 /tags.c/1.16/Result of merge//
-/extend.c/1.71/Result of merge//
-/funmap.c/1.59/Result of merge+Thu Oct  3 02:58:58 2019//
-/Makefile/1.35/Sun Feb 28 00:19:23 2021//
-/README/1.14/Sun Feb 28 00:19:23 2021//
-/autoexec.c/1.17/Sun Feb 28 00:19:14 2021//
-/basic.c/1.50/Sun Feb 28 00:19:23 2021//
-/bell.c/1.5/Sun Feb 28 00:19:14 2021//
-/buffer.c/1.107/Sun Feb 28 00:19:14 2021//
-/chrdef.h/1.10/Sun Feb 28 00:19:14 2021//
-/cinfo.c/1.18/Sun Feb 28 00:19:14 2021//
-/cmode.c/1.17/Sun Feb 28 00:19:14 2021//
-/cscope.c/1.18/Sun Feb 28 00:19:14 2021//
-/def.h/1.167/Result of merge//
-/dir.c/1.31/Sun Feb 28 00:19:14 2021//
-/dired.c/1.96/Sun Feb 28 00:19:25 2021//
-/display.c/1.48/Sun Feb 28 00:19:14 2021//
-/echo.c/1.66/Sun Feb 28 00:19:14 2021//
-/file.c/1.102/Sun Feb 28 00:19:14 2021//
-/fileio.c/1.107/Result of merge//
-/funmap.h/1.8/Sun Feb 28 00:19:14 2021//
-/grep.c/1.48/Sun Feb 28 00:19:14 2021//
-/help.c/1.35/Sun Feb 28 00:19:14 2021//
-/interpreter.c/1.6/Sun Feb 28 00:19:25 2021//
-/kbd.c/1.34/Sun Feb 28 00:19:14 2021//
-/kbd.h/1.19/Sun Feb 28 00:19:14 2021//
-/key.h/1.6/Sun Feb 28 00:19:14 2021//
-/keymap.c/1.58/Sun Feb 28 00:19:14 2021//
-/line.c/1.62/Sun Feb 28 00:19:14 2021//
-/log.c/1.11/Sun Feb 28 00:19:14 2021//
-/log.h/1.5/Sun Feb 28 00:19:14 2021//
-/macro.c/1.16/Sun Feb 28 00:19:14 2021//
-/macro.h/1.7/Sun Feb 28 00:19:14 2021//
-/main.c/1.88/Result of merge//
-/match.c/1.21/Sun Feb 28 00:19:14 2021//
-/mg.1/1.120/Sun Feb 28 00:19:25 2021//
-/modes.c/1.21/Sun Feb 28 00:19:14 2021//
-/paragraph.c/1.46/Sun Feb 28 00:19:14 2021//
-/pathnames.h/1.1/Sun Feb 28 00:19:14 2021//
-/re_search.c/1.35/Sun Feb 28 00:19:14 2021//
-/region.c/1.38/Sun Feb 28 00:19:14 2021//
-/search.c/1.47/Sun Feb 28 00:19:14 2021//
-/spawn.c/1.12/Sun Feb 28 00:19:14 2021//
-/tty.c/1.37/Sun Feb 28 00:19:14 2021//
-/ttyio.c/1.38/Sun Feb 28 00:19:14 2021//
-/ttykbd.c/1.20/Sun Feb 28 00:19:25 2021//
-/tutorial/1.18/Sun Feb 28 00:19:14 2021//
-/undo.c/1.58/Sun Feb 28 00:19:14 2021//
-/util.c/1.42/Sun Feb 28 00:19:14 2021//
-/window.c/1.36/Sun Feb 28 00:19:14 2021//
-/yank.c/1.14/Sun Feb 28 00:19:14 2021//
+/Makefile/1.35/Sat May  1 00:34:10 2021//
+/README/1.14/Sat May  1 00:34:10 2021//
+/autoexec.c/1.18/Sat May  1 00:34:10 2021//
+/basic.c/1.50/Sat May  1 00:34:03 2021//
+/bell.c/1.5/Sat May  1 00:34:03 2021//
+/buffer.c/1.112/Sat May  1 00:34:10 2021//
+/chrdef.h/1.10/Sat May  1 00:34:03 2021//
+/cinfo.c/1.18/Sat May  1 00:34:03 2021//
+/cmode.c/1.17/Sat May  1 00:34:03 2021//
+/cscope.c/1.20/Sat May  1 00:34:10 2021//
+/def.h/1.173/Result of merge//
+/dir.c/1.31/Sat May  1 00:34:03 2021//
+/dired.c/1.99/Sat May  1 00:34:10 2021//
+/display.c/1.48/Sat May  1 00:34:03 2021//
+/echo.c/1.68/Sat May  1 00:34:10 2021//
+/extend.c/1.74/Result of merge//
+/file.c/1.102/Sat May  1 00:34:03 2021//
+/fileio.c/1.108/Result of merge//
+/funmap.c/1.63/Result of merge//
+/funmap.h/1.8/Sat May  1 00:34:03 2021//
+/grep.c/1.49/Sat May  1 00:34:10 2021//
+/help.c/1.35/Sat May  1 00:34:03 2021//
+/interpreter.c/1.22/Sat May  1 00:34:10 2021//
+/kbd.c/1.35/Sat May  1 00:34:10 2021//
+/kbd.h/1.19/Sat May  1 00:34:03 2021//
+/key.h/1.6/Sat May  1 00:34:03 2021//
+/keymap.c/1.59/Sat May  1 00:34:10 2021//
+/line.c/1.63/Sat May  1 00:34:10 2021//
+/log.c/1.12/Sat May  1 00:34:10 2021//
+/log.h/1.6/Sat May  1 00:34:10 2021//
+/macro.c/1.16/Sat May  1 00:34:03 2021//
+/macro.h/1.7/Sat May  1 00:34:03 2021//
+/main.c/1.89/Result of merge//
+/match.c/1.22/Sat May  1 00:34:10 2021//
+/mg.1/1.124/Sat May  1 00:34:10 2021//
+/modes.c/1.21/Sat May  1 00:34:03 2021//
+/paragraph.c/1.46/Sat May  1 00:34:03 2021//
+/pathnames.h/1.1/Sat May  1 00:34:03 2021//
+/re_search.c/1.36/Sat May  1 00:34:10 2021//
+/region.c/1.39/Sat May  1 00:34:10 2021//
+/search.c/1.47/Sat May  1 00:34:03 2021//
+/spawn.c/1.12/Sat May  1 00:34:03 2021//
+/tty.c/1.39/Sat May  1 00:34:10 2021//
+/ttyio.c/1.40/Sat May  1 00:34:10 2021//
+/ttykbd.c/1.20/Sat May  1 00:34:03 2021//
+/tutorial/1.18/Sat May  1 00:34:03 2021//
+/undo.c/1.58/Sat May  1 00:34:03 2021//
+/util.c/1.43/Sat May  1 00:34:10 2021//
+/window.c/1.36/Sat May  1 00:34:03 2021//
+/yank.c/1.15/Sat May  1 00:34:10 2021//
 D

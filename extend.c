@@ -1,4 +1,4 @@
-/*	$OpenBSD: extend.c,v 1.71 2019/07/18 15:52:11 lum Exp $	*/
+/*	$OpenBSD: extend.c,v 1.74 2021/03/25 12:46:11 lum Exp $	*/
 /* This file is in the public domain. */
 
 /*
@@ -42,7 +42,8 @@ insert(int f, int n)
 	if (inmacro) {
 		while (--n >= 0) {
 			for (count = 0; count < maclcur->l_used; count++) {
-				if ((((c = maclcur->l_text[count]) == '\n')
+				if ((((c = maclcur->l_text[count]) ==
+				    *curbp->b_nlchr)
 				    ? lnewline() : linsert(1, c)) != TRUE)
 					return (FALSE);
 			}
@@ -61,7 +62,8 @@ insert(int f, int n)
 	while (--n >= 0) {
 		cp = buf;
 		while (*cp) {
-			if (((*cp == '\n') ? lnewline() : linsert(1, *cp))
+			if (((*cp == *curbp->b_nlchr) ?
+			    lnewline() : linsert(1, *cp))
 			    != TRUE)
 				return (FALSE);
 			cp++;
@@ -434,7 +436,7 @@ dobindkey(KEYMAP *map, const char *func, const char *str)
 				break;
 			case 'n':
 			case 'N':
-				key.k_chars[i] = '\n';
+				key.k_chars[i] = *curbp->b_nlchr;
 				break;
 			case 'r':
 			case 'R':
@@ -568,19 +570,24 @@ extend(int f, int n)
 
 /*
  * evalexpr - get one line from the user, and run it.
+ * Use strlen for length of line, assume user is not typing in a '\0' in the
+ * modeline. llen only used for foundparen() so old-school will be ok.
  */
 /* ARGSUSED */
 int
 evalexpr(int f, int n)
 {
 	char	 exbuf[BUFSIZE], *bufp;
+	int	 llen;
 
 	if ((bufp = eread("Eval: ", exbuf, sizeof(exbuf),
 	    EFNEW | EFCR)) == NULL)
 		return (ABORT);
 	else if (bufp[0] == '\0')
 		return (FALSE);
-	return (excline(exbuf));
+	llen = strlen(bufp);
+
+	return (excline(exbuf, llen));
 }
 
 /*
@@ -593,22 +600,23 @@ evalbuffer(int f, int n)
 {
 	struct line		*lp;
 	struct buffer		*bp = curbp;
-	int		 s;
+	int		 s, llen;
 	static char	 excbuf[BUFSIZE];
 
 	for (lp = bfirstlp(bp); lp != bp->b_headp; lp = lforw(lp)) {
-		if (llength(lp) >= BUFSIZE)
+		llen = llength(lp);
+		if (llen >= BUFSIZE)
 			return (FALSE);
-		(void)strncpy(excbuf, ltext(lp), llength(lp));
+		(void)strncpy(excbuf, ltext(lp), llen);
 
-		/* make sure it's terminated */
-		excbuf[llength(lp)] = '\0';
-		if ((s = excline(excbuf)) != TRUE) {
-			(void) clearvars();
+		/* make sure the line is terminated */
+		excbuf[llen] = '\0';
+		if ((s = excline(excbuf, llen)) != TRUE) {
+			cleanup();
 			return (s);
 		}
 	}
-	(void) clearvars();
+	cleanup();
 	return (TRUE);
 }
 
@@ -659,7 +667,7 @@ load(const char *fname)
 	    == FIOSUC) {
 		line++;
 		excbuf[nbytes] = '\0';
-		if (excline(excbuf) != TRUE) {
+		if (excline(excbuf, nbytes) != TRUE) {
 			s = FIOERR;
 			dobeep();
 			ewprintf("Error loading file %s at line %d", fncpy, line);
@@ -668,7 +676,7 @@ load(const char *fname)
 	}
 	(void)ffclose(ffp, NULL);
 	excbuf[nbytes] = '\0';
-	if (s != FIOEOF || (nbytes && excline(excbuf) != TRUE))
+	if (s != FIOEOF || (nbytes && excline(excbuf, nbytes) != TRUE))
 		return (FALSE);
 	return (TRUE);
 }
@@ -677,7 +685,7 @@ load(const char *fname)
  * excline - run a line from a load file or eval-expression.
  */
 int
-excline(char *line)
+excline(char *line, int llen)
 {
 	PF	 fp;
 	struct line	*lp, *np;
@@ -704,7 +712,7 @@ excline(char *line)
 	if (*funcp == '\0')
 		return (TRUE);	/* No error on blank lines */
 	if (*funcp == '(')
-		return (foundparen(funcp));
+		return (foundparen(funcp, llen));
 	line = parsetoken(funcp);
 	if (*line != '\0') {
 		*line++ = '\0';

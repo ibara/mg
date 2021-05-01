@@ -1,4 +1,4 @@
-/*	$OpenBSD: ttyio.c,v 1.38 2019/06/28 13:35:02 deraadt Exp $	*/
+/*	$OpenBSD: ttyio.c,v 1.40 2021/03/20 09:00:49 lum Exp $	*/
 
 /* This file is in the public domain. */
 
@@ -140,7 +140,7 @@ ttflush(void)
 	ssize_t	 written;
 	char	*buf = obuf;
 
-	if (nobuf == 0)
+	if (nobuf == 0 || batch == 1)
 		return;
 
 	while ((written = write(fileno(stdout), buf, nobuf)) != nobuf) {
@@ -206,7 +206,7 @@ panic(char *s)
 	ttclose();
 	(void) fputs("panic: ", stderr);
 	(void) fputs(s, stderr);
-	(void) fputc('\n', stderr);
+	(void) fputc('\n', stderr);	/* Use '\n' as no buffers now. */
 	exit(1);
 }
 
