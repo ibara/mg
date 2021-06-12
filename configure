@@ -371,6 +371,7 @@ echo "$os"
 case "x$os" in
   "xLinux"|"xCYGWIN"*)
     cflags="$cflags -D_GNU_SOURCE -D__dead=\"__attribute__((__noreturn__))\" -Dst_mtimespec=st_mtim"
+    libs="$libs -lutil"
     ;;
   "xDarwin")
     cflags="$cflags -DMSG_NOSIGNAL=SO_NOSIGPIPE -DLOGIN_NAME_MAX=MAXLOGNAME"
