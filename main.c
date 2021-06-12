@@ -17,7 +17,7 @@
 #include <termios.h>
 #include <unistd.h>
 #if defined(__linux__) || defined(__CYGWIN__)
-#include "util.h"
+#include <pty.h>
 #elif defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
 #include <util.h>
 #else
