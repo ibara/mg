@@ -29,6 +29,12 @@ If you do not have the ncurses library, you can call `configure` with the
 NetBSD curses library. In this setup, there are no dependencies other than
 the system's libc.
 
+Single-user mode
+----------------
+When configured with `--enable-static` and `--with-builtin-curses`, the
+resulting `mg` binary can use used in single-user mode if placed in `/`
+or `/bin` or some other directory accessible in single-user mode.
+
 Testing
 -------
 Tested on recent versions of Arch, Alpine, Cygwin, Debian, DragonFly BSD,
