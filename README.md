@@ -35,6 +35,11 @@ When configured with `--enable-static` and `--with-builtin-curses`, the
 resulting `mg` binary can use used in single-user mode if placed in `/`
 or `/bin` or some other directory accessible in single-user mode.
 
+`mg` can be invoked in single-user mode similar to:
+```
+$ TERM=vt100 mg
+```
+
 Testing
 -------
 Tested on recent versions of Arch, Alpine, Cygwin, Debian, DragonFly BSD,
