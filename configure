@@ -267,6 +267,12 @@ do
     --mandir=*)
 	mandir=`echo $opt | cut -d '=' -f 2`
 	;;
+    --cc=*)
+	CC=${opt#*=}
+	;;
+    --cflags=*)
+	CFLAGS=${opt#*=}
+	;;
     --disable-logging|--enable-logging)
 	if [ "x$opt" = "x--enable-logging" ] ; then
 	  log=1
@@ -298,6 +304,10 @@ do
 	echo "Top level install directory is PREFIX [$prefix]"
 	printf "  --mandir=MANDIR         "
 	echo "Manual pages are installed to MANDIR [$mandir]"
+	printf "  --cc=CC                 "
+	echo "Use specified C compiler [default=cc]"
+	printf "  --cflags=CFLAGS         "
+	echo "Use specified CFLAGS [default=\"-g -O2\"]"
 	printf "  --enable-logging        "
 	echo "Enable run-time debugging [default=no]"
 	printf "  --enable-static         "

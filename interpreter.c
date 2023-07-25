@@ -1,4 +1,4 @@
-/*      $OpenBSD: interpreter.c,v 1.32 2021/05/12 11:13:23 lum Exp $	*/
+/*      $OpenBSD: interpreter.c,v 1.35 2023/04/17 10:11:30 op Exp $	*/
 /*
  * This file is in the public domain.
  *
@@ -8,7 +8,7 @@
 /*
  * This file attempts to add some 'scripting' functionality into mg.
  *
- * The initial goal is to give mg the ability to use it's existing functions
+ * The initial goal is to give mg the ability to use its existing functions
  * and structures in a linked-up way. Hopefully resulting in user definable
  * functions. The syntax is 'scheme' like but currently it is not a scheme
  * interpreter.
@@ -406,7 +406,7 @@ parsexp(char *begp, const char *par1, const char *par2, int blkid, int expctr,
 	 * If no extant mg command found, just return.
 	 */
 	if ((funcp = name_function(cmdp)) == NULL)
-		return (dobeep_msgs("Unknown command: ", cmdp));
+		return (dobeep_msgs("Unknown command:", cmdp));
 
 	numparams = numparams_function(funcp);
 	if (numparams == 0)
@@ -492,9 +492,8 @@ multiarg(char *cmdp, char *argbuf, int numparams)
 
        			if (!doregex(regs, argp)) {
 				const char *errstr;
-				int iters;
 
-				iters = strtonum(argp, 0, INT_MAX, &errstr);
+				strtonum(argp, 0, INT_MAX, &errstr);
 				if (errstr != NULL)
 					return (dobeep_msgs("Var not found:",
 					    argp));
@@ -628,7 +627,7 @@ expandvals(char *cmdp, char *valp, char *bp)
 	char	*argp, *endp, *p, *v, *s = " ";
 	char	*regs;
 	int	 spc, cnt;
-	int	 inlist, sizof, fin, inquote;
+	int	 sizof, fin, inquote;
 
 	/* now find the first argument */
 	p = skipwhite(valp);
@@ -637,7 +636,7 @@ expandvals(char *cmdp, char *valp, char *bp)
 		return (dobeep_msg("strlcpy error"));
 	argp = argbuf;
 	spc = 1; /* initially fake a space so we find first argument */
-	inlist = fin = inquote = cnt = spc = 0;
+	fin = inquote = cnt = spc = 0;
 
 	for (p = argbuf; *p != '\0'; p++) {
 		if (*(p + 1) == '\0')
@@ -693,9 +692,8 @@ expandvals(char *cmdp, char *valp, char *bp)
 				continue;
 			} else {
 				const char *errstr;
-				int iters;
 
-				iters = strtonum(argp, 0, INT_MAX, &errstr);
+				strtonum(argp, 0, INT_MAX, &errstr);
 				if (errstr != NULL)
 					return (dobeep_msgs("Var not found:",
 					    argp));

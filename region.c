@@ -1,4 +1,4 @@
-/*	$OpenBSD: region.c,v 1.39 2021/03/01 10:51:14 lum Exp $	*/
+/*	$OpenBSD: region.c,v 1.44 2023/03/28 14:47:28 op Exp $	*/
 
 /* This file is in the public domain. */
 
@@ -15,6 +15,7 @@
 #include <sys/wait.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <paths.h>
 #include <poll.h>
 #include <signal.h>
 #include <stdio.h>
@@ -33,13 +34,12 @@ static	int	iomux(int, char * const, int, struct buffer *);
 static	int	preadin(int, struct buffer *);
 static	void	pwriteout(int, char **, int *);
 static	int	setsize(struct region *, RSIZE);
-static	int	shellcmdoutput(char * const[], char * const, int);
+static	int	shellcmdoutput(char * const, char * const, int);
 
 /*
  * Kill the region.  Ask "getregion" to figure out the bounds of the region.
  * Move "." to the start, and kill the characters. Mark is cleared afterwards.
  */
-/* ARGSUSED */
 int
 killregion(int f, int n)
 {
@@ -66,7 +66,6 @@ killregion(int f, int n)
  * clearing the mark afterwards.
  * This is a bit like a kill region followed by a yank.
  */
-/* ARGSUSED */
 int
 copyregion(int f, int n)
 {
@@ -112,7 +111,6 @@ copyregion(int f, int n)
  * the changes. Call "lchange" to ensure that redisplay is done in all
  * buffers.
  */
-/* ARGSUSED */
 int
 lowerregion(int f, int n)
 {
@@ -156,7 +154,6 @@ lowerregion(int f, int n)
  * doing the changes.  Call "lchange" to ensure that redisplay is done in all
  * buffers.
  */
-/* ARGSUSED */
 int
 upperregion(int f, int n)
 {
@@ -285,7 +282,6 @@ static char	prefix_string[PREFIXLENGTH] = {'>', '\0'};
  * beginning of the line after the end of the region.  If an argument is
  * given, prompts for the line prefix string.
  */
-/* ARGSUSED */
 int
 prefixregion(int f, int n)
 {
@@ -332,7 +328,6 @@ prefixregion(int f, int n)
 /*
  * Set line prefix string. Used by prefixregion.
  */
-/* ARGSUSED */
 int
 setprefix(int f, int n)
 {
@@ -414,14 +409,12 @@ markbuffer(int f, int n)
 /*
  * Pipe text from current region to external command.
  */
-/*ARGSUSED */
 int
 piperegion(int f, int n)
 {
 	struct region region;
 	int len;
 	char *cmd, cmdbuf[NFILEN], *text;
-	char *argv[] = {"sh", "-c", (char *) NULL, (char *) NULL};
 
 	/* C-u M-| is not supported yet */
 	if (n > 1)
@@ -437,8 +430,6 @@ piperegion(int f, int n)
 	    EFNEW | EFCR)) == NULL || (cmd[0] == '\0'))
 		return (ABORT);
 
-	argv[2] = cmd;
-
 	if (getregion(&region) != TRUE)
 		return (FALSE);
 
@@ -452,19 +443,16 @@ piperegion(int f, int n)
 
 	region_get_data(&region, text, len);
 
-	return shellcmdoutput(argv, text, len);
+	return shellcmdoutput(cmd, text, len);
 }
 
 /*
  * Get command from mini-buffer and execute externally.
  */
-/*ARGSUSED */
 int
 shellcommand(int f, int n)
 {
-
 	char *cmd, cmdbuf[NFILEN];
-	char *argv[] = {"sh", "-c", (char *) NULL, (char *) NULL};
 
 	if (n > 1)
 		return (ABORT);
@@ -473,17 +461,14 @@ shellcommand(int f, int n)
 	    EFNEW | EFCR)) == NULL || (cmd[0] == '\0'))
 		return (ABORT);
 
-	argv[2] = cmd;
-
-	return shellcmdoutput(argv, NULL, 0);
+	return shellcmdoutput(cmd, NULL, 0);
 }
 
-
 int
-shellcmdoutput(char* const argv[], char* const text, int len)
+shellcmdoutput(char* const cmd, char* const text, int len)
 {
-
 	struct buffer *bp;
+	char	*argv[] = {NULL, "-c", cmd, NULL};
 	char	*shellp;
 	int	 ret;
 
@@ -494,7 +479,13 @@ shellcmdoutput(char* const argv[], char* const text, int len)
 		return (FALSE);
 	}
 
-	shellp = getenv("SHELL");
+	if ((shellp = getenv("SHELL")) == NULL)
+		shellp = _PATH_BSHELL;
+
+	if ((argv[0] = strrchr(shellp, '/')) != NULL)
+		argv[0]++;
+	else
+		argv[0] = shellp;
 
 	ret = pipeio(shellp, argv, text, len, bp);
 
@@ -541,8 +532,6 @@ pipeio(const char* const path, char* const argv[], char* const text, int len,
 			_exit(1);
 		if (dup2(s[1], STDERR_FILENO) == -1)
 			_exit(1);
-		if (path == NULL)
-			_exit(1);
 
 		execv(path, argv);
 		err = strerror(errno);
@@ -575,7 +564,7 @@ iomux(int fd, char* const text, int len, struct buffer *outbp)
 	pfd[0].fd = fd;
 
 	/* There is nothing to write if len is zero
-	 * but the cmd's output should be read so shutdown 
+	 * but the cmd's output should be read so shutdown
 	 * the socket for writing only and don't wait for POLLOUT
 	 */
 	if (len == 0) {
@@ -596,7 +585,7 @@ iomux(int fd, char* const text, int len, struct buffer *outbp)
 	}
 	close(fd);
 
-	/* In case if last line doesn't have a '\n' add the leftover 
+	/* In case if last line doesn't have a '\n' add the leftover
 	 * characters to buffer.
 	 */
 	if (leftover[0] != '\0') {
@@ -616,7 +605,7 @@ iomux(int fd, char* const text, int len, struct buffer *outbp)
 }
 
 /*
- * Write some text from region to fd. Once done shutdown the 
+ * Write some text from region to fd. Once done shutdown the
  * write end.
  */
 void
@@ -637,7 +626,7 @@ pwriteout(int fd, char **text, int *len)
 
 	*text += w;
 	if (*len <= 0)
-		shutdown(fd, SHUT_WR);		
+		shutdown(fd, SHUT_WR);
 }
 
 /*

@@ -1,4 +1,4 @@
-/*	$OpenBSD: dir.c,v 1.31 2019/06/28 13:35:02 deraadt Exp $	*/
+/*	$OpenBSD: dir.c,v 1.33 2023/03/08 04:43:11 guenther Exp $	*/
 
 /* This file is in the public domain. */
 
@@ -36,7 +36,6 @@ dirinit(void)
 /*
  * Change current working directory.
  */
-/* ARGSUSED */
 int
 changedir(int f, int n)
 {
@@ -69,7 +68,6 @@ changedir(int f, int n)
 /*
  * Show current directory.
  */
-/* ARGSUSED */
 int
 showcwdir(int f, int n)
 {
@@ -86,8 +84,7 @@ getcwdir(char *buf, size_t len)
 	return (TRUE);
 }
 
-/* Create the directory and it's parents. */
-/* ARGSUSED */
+/* Create the directory and its parents. */
 int
 makedir(int f, int n)
 {

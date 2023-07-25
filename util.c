@@ -1,4 +1,4 @@
-/*	$OpenBSD: util.c,v 1.43 2021/03/01 10:51:14 lum Exp $	*/
+/*	$OpenBSD: util.c,v 1.50 2023/04/28 10:02:03 op Exp $	*/
 
 /* This file is in the public domain. */
 
@@ -16,6 +16,18 @@
 
 #include "def.h"
 
+int	doindent(int);
+
+/*
+ * Compute next tab stop, with `col' being the a column number and
+ * `tabw' the tab width.
+ */
+int
+ntabstop(int col, int tabw)
+{
+	return (((col + tabw) / tabw) * tabw);
+}
+
 /*
  * Display a bunch of useful information about the current location of dot.
  * The character under the cursor (in octal), the current line, row, and
@@ -27,7 +39,6 @@
  * position display; it does not truncate just because the screen does.
  * This is normally bound to "C-x =".
  */
-/* ARGSUSED */
 int
 showcpos(int f, int n)
 {
@@ -101,13 +112,8 @@ getcolpos(struct mgwin *wp)
 
 	for (i = 0; i < wp->w_doto; ++i) {
 		c = lgetc(wp->w_dotp, i);
-		if (c == '\t'
-#ifdef NOTAB
-		    && !(wp->w_bufp->b_flag & BFNOTAB)
-#endif /* NOTAB */
-			) {
-			col |= 0x07;
-			col++;
+		if (c == '\t') {
+			col = ntabstop(col, wp->w_bufp->b_tabw);
 		} else if (ISCTRL(c) != FALSE)
 			col += 2;
 		else if (isprint(c)) {
@@ -126,7 +132,6 @@ getcolpos(struct mgwin *wp)
  * Normally bound to "C-t".  This always works within a line, so "WFEDIT"
  * is good enough.
  */
-/* ARGSUSED */
 int
 twiddle(int f, int n)
 {
@@ -180,7 +185,6 @@ twiddle(int f, int n)
  * subcommand processors.  They even handle the looping.  Normally this
  * is bound to "C-o".
  */
-/* ARGSUSED */
 int
 openline(int f, int n)
 {
@@ -208,7 +212,6 @@ openline(int f, int n)
 /*
  * Insert a newline.
  */
-/* ARGSUSED */
 int
 enewline(int f, int n)
 {
@@ -232,7 +235,6 @@ enewline(int f, int n)
  * the line. Normally this command is bound to "C-x C-o". Any argument is
  * ignored.
  */
-/* ARGSUSED */
 int
 deblank(int f, int n)
 {
@@ -269,7 +271,6 @@ justone(int f, int n)
 /*
  * Delete any whitespace around dot.
  */
-/* ARGSUSED */
 int
 delwhite(int f, int n)
 {
@@ -342,17 +343,32 @@ deltrailwhite(int f, int n)
 	return (TRUE);
 }
 
+/*
+ * Raw indent routine.  Use spaces and tabs to fill the given number of
+ * cols, but respect no-tab-mode.
+ */
+int
+doindent(int cols)
+{
+	int n;
 
+	if (curbp->b_flag & BFNOTAB)
+		return (linsert(cols, ' '));
+	if ((n = cols / 8) != 0 && linsert(n, '\t') == FALSE)
+		return (FALSE);
+	if ((n = cols % 8) != 0 && linsert(n, ' ') == FALSE)
+		return (FALSE);
+	return (TRUE);
+}
 
 /*
  * Insert a newline, then enough tabs and spaces to duplicate the indentation
- * of the previous line.  Assumes tabs are every eight characters.  Quite
- * simple.  Figure out the indentation of the current line.  Insert a newline
- * by calling the standard routine.  Insert the indentation by inserting the
+ * of the previous line, respecting no-tab-mode and the buffer tab width.
+ * Figure out the indentation of the current line.  Insert a newline by
+ * calling the standard routine.  Insert the indentation by inserting the
  * right number of tabs and spaces.  Return TRUE if all ok.  Return FALSE if
  * one of the subcommands failed. Normally bound to "C-m".
  */
-/* ARGSUSED */
 int
 lfindent(int f, int n)
 {
@@ -370,15 +386,13 @@ lfindent(int f, int n)
 			if (c != ' ' && c != '\t')
 				break;
 			if (c == '\t')
-				nicol |= 0x07;
-			++nicol;
+				nicol = ntabstop(nicol, curwp->w_bufp->b_tabw);
+			else
+				++nicol;
 		}
-		if (lnewline() == FALSE || ((
-#ifdef	NOTAB
-		    curbp->b_flag & BFNOTAB) ? linsert(nicol, ' ') == FALSE : (
-#endif /* NOTAB */
-		    ((i = nicol / 8) != 0 && linsert(i, '\t') == FALSE) ||
-		    ((i = nicol % 8) != 0 && linsert(i, ' ') == FALSE)))) {
+		(void)delwhite(FFRAND, 1);
+
+		if (lnewline() == FALSE || doindent(nicol) == FALSE) {
 			s = FALSE;
 			break;
 		}
@@ -395,7 +409,7 @@ lfindent(int f, int n)
 int
 indent(int f, int n)
 {
-	int soff, i;
+	int soff;
 
 	if (n < 0)
 		return (FALSE);
@@ -409,12 +423,7 @@ indent(int f, int n)
 	/* insert appropriate whitespace */
 	soff = curwp->w_doto;
 	(void)gotobol(FFRAND, 1);
-	if (
-#ifdef	NOTAB
-	    (curbp->b_flag & BFNOTAB) ? linsert(n, ' ') == FALSE :
-#endif /* NOTAB */
-	    (((i = n / 8) != 0 && linsert(i, '\t') == FALSE) ||
-	    ((i = n % 8) != 0 && linsert(i, ' ') == FALSE)))
+	if (doindent(n) == FALSE)
 		return (FALSE);
 
 	forwchar(FFRAND, soff);
@@ -429,7 +438,6 @@ indent(int f, int n)
  * If any argument is present, it kills rather than deletes, to prevent loss
  * of text if typed with a big argument.  Normally bound to "C-d".
  */
-/* ARGSUSED */
 int
 forwdel(int f, int n)
 {
@@ -451,7 +459,6 @@ forwdel(int f, int n)
  * other functions.  Just move the cursor back, and delete forwards.  Like
  * delete forward, this actually does a kill if presented with an argument.
  */
-/* ARGSUSED */
 int
 backdel(int f, int n)
 {
@@ -472,18 +479,21 @@ backdel(int f, int n)
 	return (s);
 }
 
-#ifdef	NOTAB
-/* ARGSUSED */
 int
 space_to_tabstop(int f, int n)
 {
+	int	col, target;
+
 	if (n < 0)
 		return (FALSE);
 	if (n == 0)
 		return (TRUE);
-	return (linsert((n << 3) - (curwp->w_doto & 7), ' '));
+
+	col = target = getcolpos(curwp);
+	while (n-- > 0)
+		target = ntabstop(target, curbp->b_tabw);
+	return (linsert(target - col, ' '));
 }
-#endif /* NOTAB */
 
 /*
  * Move the dot to the first non-whitespace character of the current line.

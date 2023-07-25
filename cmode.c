@@ -1,4 +1,4 @@
-/* $OpenBSD: cmode.c,v 1.17 2019/07/11 18:20:18 lum Exp $ */
+/* $OpenBSD: cmode.c,v 1.22 2023/04/21 13:39:37 op Exp $ */
 /*
  * This file is in the public domain.
  *
@@ -86,7 +86,7 @@ static struct KEYMAPE (3) cmodemap = {
 	}
 };
 
-/* Funtion, Mode hooks */
+/* Function, Mode hooks */
 
 void
 cmode_init(void)
@@ -205,13 +205,15 @@ cc_lfindent(int f, int n)
 {
 	if (n < 0)
 		return (FALSE);
+	if (cc_strip_trailp)
+		(void)delwhite(FFRAND, 1);
 	if (enewline(FFRAND, 1) == FALSE)
 		return (FALSE);
 	return (cc_indent(FFRAND, n));
 }
 
 /*
- * Get the level of indention after line lp is processed
+ * Get the level of indentation after line lp is processed
  * Note getindent has two returns:
  * curi = value if indenting current line.
  * return value = value affecting subsequent lines.
@@ -225,7 +227,7 @@ getindent(const struct line *lp, int *curi)
 	int newind = 0;		/* new index value */
 	int stringp = FALSE;	/* in string? */
 	int escp = FALSE;	/* Escape char? */
-	int lastc = '\0';	/* Last matched string delimeter */
+	int lastc = '\0';	/* Last matched string delimiter */
 	int nparen = 0;		/* paren count */
 	int obrace = 0;		/* open brace count */
 	int cbrace = 0;		/* close brace count */
@@ -243,14 +245,10 @@ getindent(const struct line *lp, int *curi)
 	for (lo = 0; lo < llength(lp); lo++) {
 		if (!isspace(c = lgetc(lp, lo)))
 			break;
-		if (c == '\t'
-#ifdef NOTAB
-		    && !(curbp->b_flag & BFNOTAB)
-#endif /* NOTAB */
-		    ) {
-			nicol |= 0x07;
-		}
-		nicol++;
+		if (c == '\t')
+			nicol = ntabstop(nicol, curbp->b_tabw);
+		else
+			nicol++;
 	}
 
 	/* If last line was blank, choose 0 */
@@ -354,7 +352,7 @@ getindent(const struct line *lp, int *curi)
 }
 
 /*
- * Given a delimeter and its purported mate, tell us if they
+ * Given a delimiter and its purported mate, tell us if they
  * match.
  */
 static int
@@ -412,13 +410,8 @@ findcolpos(const struct buffer *bp, const struct line *lp, int lo)
 
 	for (i = 0; i < lo; ++i) {
 		c = lgetc(lp, i);
-		if (c == '\t'
-#ifdef NOTAB
-		    && !(bp->b_flag & BFNOTAB)
-#endif /* NOTAB */
-			) {
-			col |= 0x07;
-			col++;
+		if (c == '\t') {
+			col = ntabstop(col, curbp->b_tabw);
 		} else if (ISCTRL(c) != FALSE)
 			col += 2;
 		else if (isprint(c)) {

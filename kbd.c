@@ -1,4 +1,4 @@
-/*	$OpenBSD: kbd.c,v 1.35 2021/03/01 10:51:14 lum Exp $	*/
+/*	$OpenBSD: kbd.c,v 1.37 2023/03/08 04:43:11 guenther Exp $	*/
 
 /* This file is in the public domain. */
 
@@ -254,7 +254,6 @@ universal_argument(int f, int n)
 	}
 }
 
-/* ARGSUSED */
 int
 digit_argument(int f, int n)
 {
@@ -438,7 +437,7 @@ quote(int f, int n)
 }
 
 /*
- * Wraper function to count invocation repeats.
+ * Wrapper function to count invocation repeats.
  * We ignore any function whose sole purpose is to get us
  * to the intended function.
  */

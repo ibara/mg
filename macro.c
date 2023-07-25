@@ -1,4 +1,4 @@
-/*	$OpenBSD: macro.c,v 1.16 2015/03/19 21:22:15 bcallah Exp $	*/
+/*	$OpenBSD: macro.c,v 1.18 2023/03/08 04:43:11 guenther Exp $	*/
 
 /* This file is in the public domain. */
 
@@ -15,7 +15,7 @@
 #include "key.h"
 #include "macro.h"
 
-int inmacro = FALSE;	/* Macro playback in progess */
+int inmacro = FALSE;	/* Macro playback in progress */
 int macrodef = FALSE;	/* Macro recording in progress */
 int macrocount = 0;
 
@@ -24,7 +24,6 @@ struct line *maclcur;
 
 union macrodef macro[MAXMACRO];
 
-/* ARGSUSED */
 int
 definemacro(int f, int n)
 {
@@ -54,7 +53,6 @@ definemacro(int f, int n)
 	return (macrodef = TRUE);
 }
 
-/* ARGSUSED */
 int
 finishmacro(int f, int n)
 {
@@ -66,7 +64,6 @@ finishmacro(int f, int n)
 	return (FALSE);
 }
 
-/* ARGSUSED */
 int
 executemacro(int f, int n)
 {

@@ -1,4 +1,4 @@
-/*	$OpenBSD: extend.c,v 1.75 2021/05/06 14:16:12 lum Exp $	*/
+/*	$OpenBSD: extend.c,v 1.80 2023/04/17 10:11:30 op Exp $	*/
 /* This file is in the public domain. */
 
 /*
@@ -32,7 +32,6 @@ static int	 bindkey(KEYMAP **, const char *, KCHAR *, int);
 /*
  * Insert a string, mainly for use from macros (created by selfinsert).
  */
-/* ARGSUSED */
 int
 insert(int f, int n)
 {
@@ -461,7 +460,6 @@ dobindkey(KEYMAP *map, const char *func, const char *str)
 /*
  * This function modifies the fundamental keyboard map.
  */
-/* ARGSUSED */
 int
 bindtokey(int f, int n)
 {
@@ -471,7 +469,6 @@ bindtokey(int f, int n)
 /*
  * This function modifies the current mode's keyboard map.
  */
-/* ARGSUSED */
 int
 localbind(int f, int n)
 {
@@ -482,7 +479,6 @@ localbind(int f, int n)
 /*
  * This function redefines a key in any keymap.
  */
-/* ARGSUSED */
 int
 redefine_key(int f, int n)
 {
@@ -497,7 +493,7 @@ redefine_key(int f, int n)
 		return (FALSE);
 	(void)strlcat(buf, tmp, sizeof(buf));
 	if ((mp = name_map(tmp)) == NULL)
-		return (dobeep_msgs("Unknown map ", tmp));
+		return (dobeep_msgs("Unknown map", tmp));
 
 	if (strlcat(buf, "key: ", sizeof(buf)) >= sizeof(buf))
 		return (FALSE);
@@ -505,14 +501,12 @@ redefine_key(int f, int n)
 	return (dobind(mp, buf, FALSE));
 }
 
-/* ARGSUSED */
 int
 unbindtokey(int f, int n)
 {
 	return (dobind(fundamental_map, "Global unset key: ", TRUE));
 }
 
-/* ARGSUSED */
 int
 localunbind(int f, int n)
 {
@@ -573,7 +567,6 @@ extend(int f, int n)
  * Use strlen for length of line, assume user is not typing in a '\0' in the
  * modeline. llen only used for foundparen() so old-school will be ok.
  */
-/* ARGSUSED */
 int
 evalexpr(int f, int n)
 {
@@ -594,7 +587,6 @@ evalexpr(int f, int n)
  * evalbuffer - evaluate the current buffer as line commands. Useful for
  * testing startup files.
  */
-/* ARGSUSED */
 int
 evalbuffer(int f, int n)
 {
@@ -625,44 +617,40 @@ evalbuffer(int f, int n)
  * evalfile - go get a file and evaluate it as line commands. You can
  *	go get your own startup file if need be.
  */
-/* ARGSUSED */
 int
 evalfile(int f, int n)
 {
+	FILE	*ffp;
 	char	 fname[NFILEN], *bufp;
+	int	 ret;
 
 	if ((bufp = eread("Load file: ", fname, NFILEN,
 	    EFNEW | EFCR)) == NULL)
 		return (ABORT);
-	else if (bufp[0] == '\0')
+	if (bufp[0] == '\0')
 		return (FALSE);
-	return (load(fname));
+	if ((bufp = adjustname(fname, TRUE)) == NULL)
+		return (FALSE);
+	ret = ffropen(&ffp, bufp, NULL);
+	if (ret == FIODIR)
+		(void)ffclose(ffp, NULL);
+	if (ret != FIOSUC)
+		return (FALSE);
+	ret = load(ffp, bufp);
+	(void)ffclose(ffp, NULL);
+	return (ret);
 }
 
 /*
  * load - go load the file name we got passed.
  */
 int
-load(const char *fname)
+load(FILE *ffp, const char *fname)
 {
-	int	 s = TRUE, line, ret;
+	int	 s = TRUE, line;
 	int	 nbytes = 0;
-	char	 excbuf[BUFSIZE], fncpy[NFILEN];
-	FILE    *ffp;
+	char	 excbuf[BUFSIZE];
 
-	if ((fname = adjustname(fname, TRUE)) == NULL)
-		/* just to be careful */
-		return (FALSE);
-
-	ret = ffropen(&ffp, fname, NULL);
-	if (ret != FIOSUC) {
-		if (ret == FIODIR)
-			(void)ffclose(ffp, NULL);
-		return (FALSE);
-	}
-
-	/* keep a note of fname incase of errors in loaded file. */
-	(void)strlcpy(fncpy, fname, sizeof(fncpy));
 	line = 0;
 	while ((s = ffgetline(ffp, excbuf, sizeof(excbuf) - 1, &nbytes))
 	    == FIOSUC) {
@@ -671,11 +659,10 @@ load(const char *fname)
 		if (excline(excbuf, nbytes, line) != TRUE) {
 			s = FIOERR;
 			dobeep();
-			ewprintf("Error loading file %s at line %d", fncpy, line);
+			ewprintf("Error loading file %s at line %d", fname, line);
 			break;
 		}
 	}
-	(void)ffclose(ffp, NULL);
 	excbuf[nbytes] = '\0';
 	if (s != FIOEOF || (nbytes && excline(excbuf, nbytes, ++line) != TRUE))
 		return (FALSE);
@@ -733,7 +720,7 @@ excline(char *line, int llen, int lnum)
 		n = (int)nl;
 	}
 	if ((fp = name_function(funcp)) == NULL)
-		return (dobeep_msgs("Unknown function: ", funcp));
+		return (dobeep_msgs("Unknown function:", funcp));
 
 	if (fp == bindtokey || fp == unbindtokey) {
 		bind = BINDARG;
@@ -860,7 +847,7 @@ excline(char *line, int llen, int lnum)
 		case BINDNEXT:
 			lp->l_text[lp->l_used] = '\0';
 			if ((curmap = name_map(lp->l_text)) == NULL) {
-				(void)dobeep_msgs("No such mode: ", lp->l_text);
+				(void)dobeep_msgs("No such mode:", lp->l_text);
 				status = FALSE;
 				free(lp);
 				goto cleanup;

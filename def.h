@@ -1,4 +1,4 @@
-/*	$OpenBSD: def.h,v 1.176 2021/05/06 14:16:12 lum Exp $	*/
+/*	$OpenBSD: def.h,v 1.180 2023/04/21 13:39:37 op Exp $	*/
 
 /* This file is in the public domain. */
 
@@ -274,6 +274,7 @@ struct buffer {
 	char		 b_cwd[NFILEN]; /* working directory		 */
 	char		*b_nlseq;	/* Newline sequence of chars	 */
 	char		*b_nlchr;	/* 1st newline character	 */
+	int		 b_tabw;	/* Width of a tab character	 */
 	struct fileinfo	 b_fi;		/* File attributes		 */
 	struct undoq	 b_undo;	/* Undo actions list		 */
 	struct undo_rec *b_undoptr;
@@ -290,9 +291,7 @@ struct buffer {
 
 #define BFCHG	0x01			/* Changed.			 */
 #define BFBAK	0x02			/* Need to make a backup.	 */
-#ifdef	NOTAB
 #define BFNOTAB 0x04			/* no tab mode			 */
-#endif
 #define BFOVERWRITE 0x08		/* overwrite mode		 */
 #define BFREADONLY  0x10		/* read only mode		 */
 #define BFDIRTY     0x20		/* Buffer was modified elsewhere */
@@ -437,6 +436,7 @@ int		 shrinkwind(int, int);
 int		 delwind(int, int);
 
 /* buffer.c */
+int		 settabw(int, int);
 int		 togglereadonly(int, int);
 int		 togglereadonlyall(int, int);
 struct buffer   *bfind(const char *, int);
@@ -491,7 +491,7 @@ int		 ffputbuf(FILE *, struct buffer *, int);
 int		 ffgetline(FILE *, char *, int, int *);
 int		 fbackupfile(const char *);
 char		*adjustname(const char *, int);
-char		*startupfile(char *, char *);
+FILE		*startupfile(char *, char *, char *, size_t);
 int		 copy(char *, char *);
 struct list	*make_file_list(char *);
 int		 fisdir(const char *);
@@ -549,6 +549,7 @@ int		 gotoline(int, int);
 int		 setlineno(int);
 
 /* util.c X */
+int		 ntabstop(int, int);
 int		 showcpos(int, int);
 int		 getcolpos(struct mgwin *);
 int		 twiddle(int, int);
@@ -599,7 +600,7 @@ int		 extend(int, int);
 int		 evalexpr(int, int);
 int		 evalbuffer(int, int);
 int		 evalfile(int, int);
-int		 load(const char *);
+int		 load(FILE *, const char *);
 int		 excline(char *, int, int);
 char		*skipwhite(char *);
 
@@ -656,6 +657,9 @@ int		 queryrepl(int, int);
 int		 forwsrch(void);
 int		 backsrch(void);
 int		 readpattern(char *);
+int		 zapuptochar(int, int);
+int		 zaptochar(int, int);
+int		 zap(int, int);
 
 /* spawn.c X */
 int		 spawncli(int, int);
@@ -678,9 +682,7 @@ int		 executemacro(int, int);
 /* modes.c X */
 int		 indentmode(int, int);
 int		 fillmode(int, int);
-#ifdef NOTAB
 int		 notabmode(int, int);
-#endif	/* NOTAB */
 int		 overwrite_mode(int, int);
 int		 set_default_mode(int,int);
 
